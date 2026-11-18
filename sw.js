@@ -1,5 +1,5 @@
 // ExB: يحفظ واجهة التطبيق في الجوال ليفتح بسرعة. البيانات لا تُحفظ هنا أبدًا، تُجلب مباشرة من Google.
-const CACHE = 'exb-v6';
+const CACHE = 'exb-v7';
 const SHELL = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-192.png', 'icon-512.png'];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL))); self.skipWaiting(); });
 self.addEventListener('activate', e => {
