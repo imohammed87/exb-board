@@ -532,6 +532,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     var raw=document.getElementById('setupUrl').value,err=document.getElementById('setupErr');
     // نلقط الرابط من أي نص ملصوق (حتى لو معه «رابطك للتعديل:» أو مسافات وأسطر)
     var v=(raw.replace(/\s+/g,' ').match(/https?:\/\/script\.google\.com\/[^\s"'<>،]+/)||[''])[0].replace(/[).,،]+$/,'');
+    if(/…|%E2%80%A6|\.\.\./i.test(v)){err.textContent='الرابط فيه «…» يعني ناقص. انسخه كامل بزر «نسخ» من إدارة عمليات النشر، مو من الشاشة أو من مثال.';return}
     var key,api;
     try{
       var u=new URL(v);key=(u.searchParams.get('key')||'').replace(/[^a-zA-Z0-9]/g,'');
