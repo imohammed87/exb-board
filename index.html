@@ -437,6 +437,47 @@ body.dark .xerr{color:#FCA5A5}
 .setrow[aria-checked="true"] .sw{background:#14B8A6}
 .setrow[aria-checked="true"] .sw::after{inset-inline-start:20px}
 #themeBtn svg{display:block}
+
+/* ===== حركة البار العلوي ===== */
+@media (prefers-reduced-motion:no-preference){
+  /* دخول متدرّج أول ما تفتح الصفحة */
+  @keyframes barIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
+  .brandrow{animation:barIn .6s ease-out both}
+  .stats .stat{animation:barIn .55s ease-out both}
+  .stats .stat:nth-child(1){animation-delay:.12s}.stats .stat:nth-child(2){animation-delay:.2s}.stats .stat:nth-child(3){animation-delay:.28s}
+  .tools>*{animation:barIn .5s ease-out both;animation-delay:.32s}
+  /* الخط تحت العنوان يلمع */
+  h1::after{background:linear-gradient(90deg,#6A3CF0,#2B6BFF,#14B8A6,#6A3CF0)!important;background-size:300% 100%!important;animation:shine 6s linear infinite}
+  @keyframes shine{to{background-position:300% 0}}
+  /* نقطة «مباشر» تنبض */
+  .live.on i{position:relative}
+  .live.on i::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--teal);animation:ping 2.2s ease-out infinite}
+  @keyframes ping{from{transform:scale(1);opacity:.8}to{transform:scale(2.6);opacity:0}}
+  /* المتأخر يتوهج إذا فيه مهام متأخرة */
+  .stat.late.hot{animation:barIn .55s ease-out .28s both,hot 2.6s ease-in-out 1s infinite}
+  @keyframes hot{50%{box-shadow:0 0 0 1px rgba(255,138,128,.55),0 0 18px rgba(255,90,80,.35)}}
+  /* الرقم يكبر لحظة لما يتغير */
+  .stat b.bump{animation:bump .5s ease-out}
+  @keyframes bump{30%{transform:scale(1.35)}100%{transform:none}}
+  .stat b{display:inline-block}
+  /* الأزرار: رفعة خفيفة وحركة للأيقونة */
+  .sbtn-ic,.tools .ghost,.stat.sbtn{transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+  .sbtn-ic:hover,.tools .ghost:hover,.stat.sbtn:hover{transform:translateY(-2px)}
+  .sbtn-ic:active,.tools .ghost:active,.stat.sbtn:active{transform:translateY(0) scale(.96)}
+  .sbtn-ic svg{transition:transform .3s ease}
+  #addBtn:hover svg{transform:rotate(90deg)}
+  #sBtn:hover svg{transform:rotate(-14deg) scale(1.08)}
+  #micTop:hover svg{animation:wig .5s ease}
+  @keyframes wig{25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+  #setBtn:hover svg,#setBtn[aria-expanded="true"] svg{transform:rotate(60deg)}
+  #aiBtn svg{animation:twinkle 3.2s ease-in-out infinite}
+  @keyframes twinkle{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.18) rotate(12deg);opacity:.75}}
+  /* زر الإضافة يتنفّس بهدوء */
+  #addBtn{animation:barIn .5s ease-out .32s both,breathe 4.5s ease-in-out 1.5s infinite}
+  @keyframes breathe{50%{box-shadow:0 0 0 4px rgba(106,60,240,.22),0 8px 26px rgba(106,60,240,.55)}}
+  .setmenu:not([hidden]){animation:menuIn .18s ease-out}
+  @keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:none}}
+}
 </style>
 </head>
 <body>
@@ -831,9 +872,10 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     $('cols').innerHTML=html;
     fitCols(kept);
     var openT=active.filter(function(x){return x.stage!=='done'&&x.stage!=='backlog'});
-    $('sOpen').textContent=openT.length;
-    $('sToday').textContent=openT.filter(function(x){return x.due===today}).length;
-    $('sLate').textContent=openT.filter(function(x){return x.due&&x.due<today}).length;
+    setStat('sOpen',openT.length);
+    setStat('sToday',openT.filter(function(x){return x.due===today}).length);
+    var nLate=openT.filter(function(x){return x.due&&x.due<today}).length;setStat('sLate',nLate);
+    $('sLateBtn').classList.toggle('hot',nLate>0);
   }
 
   function renderArchive(q,fp){
@@ -873,6 +915,15 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   }
   function fmtWhen(iso){try{return new Date(iso).toLocaleString('ar-SA-u-nu-latn-ca-gregory',{weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})}catch(e){return String(iso).slice(0,16).replace('T',' ')}}
   function ago(iso){var m=Math.round((Date.now()-new Date(iso))/60000);if(isNaN(m))return '';if(m<1)return 'الآن';if(m<60)return 'قبل '+m+' د';var h=Math.round(m/60);if(h<24)return 'قبل '+(h===1?'ساعة':h===2?'ساعتين':h+' ساعات');var d=Math.round(h/24);return 'قبل '+(d===1?'يوم':d===2?'يومين':d+' أيام')}
+  // عدّاد متحرك للأرقام: يعدّ من القيمة القديمة للجديدة
+  function setStat(id,v){
+    var el=$(id),from=+el.textContent||0;if(from===v&&el.dataset.init) return;el.dataset.init=1;
+    var red=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if(red||from===v){el.textContent=v;return}
+    var t0=null,dur=Math.min(700,250+Math.abs(v-from)*60);
+    (function step(t){if(!t0)t0=t;var k=Math.min(1,(t-t0)/dur);el.textContent=Math.round(from+(v-from)*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(step);else{el.textContent=v;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}})(performance.now());
+    requestAnimationFrame(function(t){});
+  }
   function moveTo(x,stage){x.stage=stage;render();return mutate(call('updateTask',KEY,x.id,{stage:stage}))}
 
   function onAction(e){
