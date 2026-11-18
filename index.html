@@ -395,6 +395,38 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
 .setup .err{color:#FCA5A5;font-size:13px;min-height:20px;margin-top:10px}
 .setup small{display:block;margin-top:14px;color:#8F88B8;font-size:12px;line-height:1.7}
 .exb-out{position:fixed;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:6;font:inherit;font-size:11px;color:#8F88B8;background:transparent;border:0;opacity:.6}
+
+/* ===== الوضع الداكن للبطاقات والنوافذ ===== */
+body.dark{--card:#1A2140;--card-ink:#E8ECF7;--card-muted:#97A2BD;--card-line:#2E3860;--card-soft:#232B4F}
+body.dark .card{color-scheme:dark;box-shadow:0 10px 24px rgba(0,0,0,.45),0 0 0 1px #2A3460}
+body.dark .card.is-late{background:#2A1B2C;box-shadow:0 0 0 1.5px #7F2A2A,0 10px 24px rgba(0,0,0,.45)}
+body.dark .left{background:#263055;color:#B8C7F0}
+body.dark .left.soon{background:#3A2E12;color:#F5C76B}
+body.dark .left.over{background:#3B1616;color:#FCA5A5}
+body.dark .note,body.dark .dnote{color:#C9D2EA}
+body.dark .file{background:#232E55;color:#9DB8F5}
+body.dark .sm{background:#232B4F;color:#DCE3F5}
+body.dark .sm.del{color:#FCA5A5}
+body.dark .stage{color:#B8C7F0}
+body.dark .toast,body.dark .dcard,body.dark .prec{background:#1A2140;color:var(--card-ink)}
+body.dark .dclose,body.dark .seg button{background:#232B4F;color:#DCE3F5}
+body.dark .seg button[aria-pressed="true"]{background:#5B4BD6;color:#fff}
+body.dark .dmeta dd.late{color:#FCA5A5}
+body.dark .tri.routine{background:#12341F;color:#86EFAC;border-color:#1F5C36}
+body.dark .tri.attention{background:#3B1414;color:#FCA5A5;border-color:#6B2121}
+body.dark .tri-why{background:#2A2350;color:#D9D2FF}
+body.dark .upd-last,body.dark .dupd{background:#10302E;color:#CDEFEA}
+body.dark .upd-last b,body.dark .dupd b,body.dark .upd-list time{color:#5EEAD4}
+body.dark .dupd span{color:#8FB5B0}
+body.dark .duelog{background:#33260F;color:#F5D08A;border-color:#5A4317}
+body.dark .ext{background:#3A2E12;color:#F5C76B;border-color:#5A4317}
+body.dark .prec .why,body.dark .xwait{color:#D9D2FF}
+body.dark .prec .pn{color:#C9D2EA}
+body.dark .prec .bar{background:#2E3860}
+body.dark .sm.ai{background:#2A2350;border-color:#4C3F8F;color:#D9D2FF}
+body.dark .upd-list .x:hover{background:#3B1616;color:#FCA5A5}
+body.dark .xerr{color:#FCA5A5}
+#themeBtn svg{display:block}
 </style>
 </head>
 <body>
@@ -433,6 +465,7 @@ body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bot
     <button type="button" class="fab" id="addBtn" aria-label="مهمة جديدة" title="مهمة جديدة">
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
     </button>
+    <button type="button" class="sbtn-ic" id="themeBtn" aria-label="الوضع الداكن" title="الوضع الداكن" aria-pressed="false"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"></path></svg></button>
     <button type="button" class="sbtn-ic" id="micTop" aria-label="أضف مهمة بصوتك" title="أضف مهمة بصوتك"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></button>
   </div>
     <label for="q" class="sr">بحث</label>
@@ -1024,6 +1057,12 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   function simSearch(){var t=$('q').value.trim();if(t)runPrec({text:t,from:'search'})}
   $('simBtn').onclick=simSearch;
   $('q').addEventListener('keydown',function(e){if(e.key==='Enter'){e.preventDefault();simSearch()}});
+  // الوضع الداكن: يتذكر اختيارك على هذا الجهاز
+  var SUN='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>',MOON=$('themeBtn').innerHTML;
+  function setTheme(d){document.body.classList.toggle('dark',d);$('themeBtn').innerHTML=d?SUN:MOON;$('themeBtn').setAttribute('aria-pressed',d);$('themeBtn').title=d?'الوضع الفاتح':'الوضع الداكن';try{localStorage.setItem('exbTheme',d?'dark':'light')}catch(e){}}
+  var savedTheme=null;try{savedTheme=localStorage.getItem('exbTheme')}catch(e){}
+  setTheme(savedTheme==='dark');
+  $('themeBtn').onclick=function(){setTheme(!document.body.classList.contains('dark'))};
   $('micTop').onclick=function(){$('aiBtn').click();$('aiMic').click()};
   $('fPrec').onclick=function(){var t=($('fTitle').value+' '+$('fNotes').value).trim();runPrec({text:t})};
 
