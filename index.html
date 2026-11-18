@@ -438,46 +438,41 @@ body.dark .xerr{color:#FCA5A5}
 .setrow[aria-checked="true"] .sw::after{inset-inline-start:20px}
 #themeBtn svg{display:block}
 
-/* ===== حركة البار العلوي ===== */
+/* ===== حركة خلفية البار العلوي فقط ===== */
 @media (prefers-reduced-motion:no-preference){
-  /* دخول متدرّج أول ما تفتح الصفحة */
-  @keyframes barIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
-  .brandrow{animation:barIn .6s ease-out both}
-  .stats .stat{animation:barIn .55s ease-out both}
-  .stats .stat:nth-child(1){animation-delay:.12s}.stats .stat:nth-child(2){animation-delay:.2s}.stats .stat:nth-child(3){animation-delay:.28s}
-  .tools>*{animation:barIn .5s ease-out both;animation-delay:.32s}
-  /* الخط تحت العنوان يلمع */
-  h1::after{background:linear-gradient(90deg,#6A3CF0,#2B6BFF,#14B8A6,#6A3CF0)!important;background-size:300% 100%!important;animation:shine 6s linear infinite}
-  @keyframes shine{to{background-position:300% 0}}
-  /* نقطة «مباشر» تنبض */
-  .live.on i{position:relative}
-  .live.on i::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid var(--teal);animation:ping 2.2s ease-out infinite}
-  @keyframes ping{from{transform:scale(1);opacity:.8}to{transform:scale(2.6);opacity:0}}
-  /* المتأخر يتوهج إذا فيه مهام متأخرة */
-  .stat.late.hot{animation:barIn .55s ease-out .28s both,hot 2.6s ease-in-out 1s infinite}
-  @keyframes hot{50%{box-shadow:0 0 0 1px rgba(255,138,128,.55),0 0 18px rgba(255,90,80,.35)}}
-  /* الرقم يكبر لحظة لما يتغير */
-  .stat b.bump{animation:bump .5s ease-out}
-  @keyframes bump{30%{transform:scale(1.35)}100%{transform:none}}
-  .stat b{display:inline-block}
-  /* الأزرار: رفعة خفيفة وحركة للأيقونة */
-  .sbtn-ic,.tools .ghost,.stat.sbtn{transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
-  .sbtn-ic:hover,.tools .ghost:hover,.stat.sbtn:hover{transform:translateY(-2px)}
-  .sbtn-ic:active,.tools .ghost:active,.stat.sbtn:active{transform:translateY(0) scale(.96)}
-  .sbtn-ic svg{transition:transform .3s ease}
-  #addBtn:hover svg{transform:rotate(90deg)}
-  #sBtn:hover svg{transform:rotate(-14deg) scale(1.08)}
-  #micTop:hover svg{animation:wig .5s ease}
-  @keyframes wig{25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
-  #setBtn:hover svg,#setBtn[aria-expanded="true"] svg{transform:rotate(60deg)}
-  #aiBtn svg{animation:twinkle 3.2s ease-in-out infinite}
-  @keyframes twinkle{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.18) rotate(12deg);opacity:.75}}
-  /* زر الإضافة يتنفّس بهدوء */
-  #addBtn{animation:barIn .5s ease-out .32s both,breathe 4.5s ease-in-out 1.5s infinite}
-  @keyframes breathe{50%{box-shadow:0 0 0 4px rgba(106,60,240,.22),0 8px 26px rgba(106,60,240,.55)}}
+  /* الشريط البنفسجي ينساب ببطء ويتنفس */
+  .topbar::after{animation:ribbonFlow 18s ease-in-out infinite alternate}
+  @keyframes ribbonFlow{
+    0%{background-position:calc(100vw - 2%) 40%;opacity:.36}
+    50%{background-position:calc(100vw - 7%) 50%;opacity:.5}
+    100%{background-position:calc(100vw - 12%) 58%;opacity:.4}}
+  /* وهج ضوئي خفيف يمر على خلفية البار */
+  .topbar::before{background:
+      radial-gradient(40% 140% at var(--gx,20%) 50%,rgba(124,92,235,.22),transparent 70%),
+      radial-gradient(30% 120% at var(--gy,80%) 40%,rgba(20,184,166,.12),transparent 70%),
+      linear-gradient(180deg,rgba(6,11,26,.94) 0%,rgba(6,11,26,.82) 100%)!important;
+    animation:glowDrift 22s ease-in-out infinite alternate}
+  @property --gx{syntax:'<percentage>';inherits:false;initial-value:20%}
+  @property --gy{syntax:'<percentage>';inherits:false;initial-value:80%}
+  @keyframes glowDrift{0%{--gx:15%;--gy:85%}50%{--gx:55%;--gy:45%}100%{--gx:85%;--gy:20%}}
   .setmenu:not([hidden]){animation:menuIn .18s ease-out}
   @keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.97)}to{opacity:1;transform:none}}
 }
+
+/* ===== تخطيط عمودي: المراحل فوق بعض ===== */
+body.vlay:not(.screen) .board{overflow-x:visible;scroll-snap-type:none}
+body.vlay:not(.screen) .cols{display:flex;flex-direction:column;align-items:stretch;gap:14px}
+body.vlay:not(.screen) .col{min-height:0}
+body.vlay:not(.screen) .stack{height:auto!important;max-height:none!important;overflow:visible!important;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;align-items:start;margin:0;padding:0}
+body.vlay:not(.screen) .stack>:not(.card){grid-column:1/-1}
+body.vlay:not(.screen) .col-head{cursor:pointer;user-select:none}
+body.vlay:not(.screen) .col-head h2::before{content:"▾";display:inline-block;margin-inline-end:8px;font-size:.8em;opacity:.7;transition:transform .2s}
+body.vlay:not(.screen) .col.folded .col-head h2::before{transform:rotate(90deg)}
+body.vlay:not(.screen) .col.folded .stack{display:none}
+.seg2{display:inline-flex;border-radius:10px;overflow:hidden;border:1px solid rgba(167,139,250,.35)}
+.seg2 button{font:inherit;font-size:13px;padding:5px 12px;border:0;background:transparent;color:#C9C1EC;cursor:pointer}
+.seg2 button[aria-pressed="true"]{background:#6A3CF0;color:#fff}
+.setrow.static{cursor:default}.setrow.static:hover{background:transparent}
 </style>
 </head>
 <body>
@@ -520,6 +515,7 @@ body.dark .xerr{color:#FCA5A5}
       <div class="setmenu" id="setMenu" hidden role="menu">
         <div class="sethead">الإعدادات</div>
         <button type="button" class="setrow" id="themeBtn" role="menuitemcheckbox" aria-checked="false"><span>🌙 الوضع الداكن</span><i class="sw"></i></button>
+        <div class="setrow static"><span>🧭 عرض المراحل</span><span class="seg2" role="group" aria-label="عرض المراحل"><button type="button" data-lay="h" aria-pressed="true">أفقي</button><button type="button" data-lay="v" aria-pressed="false">عمودي</button></span></div>
         <button type="button" class="setrow" id="exbOut" role="menuitem"><span>🔗 تبديل رابط اللوحة</span></button>
       </div></div>
     <button type="button" class="sbtn-ic" id="micTop" aria-label="أضف مهمة بصوتك" title="أضف مهمة بصوتك"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></button>
@@ -732,7 +728,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
 
   var mobileJumped=false;
   function jumpToTodo(){
-    if(mobileJumped||window.innerWidth>700||document.body.classList.contains('screen')) return;
+    if(mobileJumped||window.innerWidth>700||document.body.classList.contains('screen')||document.body.classList.contains('vlay')) return;
     var c=document.querySelector('.col.new');if(!c) return;mobileJumped=true;
     var b=$('board');b.scrollLeft+=c.getBoundingClientRect().right-b.getBoundingClientRect().right;
   }
@@ -759,6 +755,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   // كل عمود بطول الشاشة، وعناوينه ثابتة، والبطاقات تتمرر داخله
   function fitCols(keep){
     var screen=document.body.classList.contains('screen');
+    if(!screen&&document.body.classList.contains('vlay')){[].forEach.call(document.querySelectorAll('.stack'),function(st){st.style.height='';st.style.maxHeight=''});return}
     if(window.innerWidth<=700){[].forEach.call(document.querySelectorAll('.stack'),function(st){st.style.height='';st.style.maxHeight=''});return}
     var top=$('board').getBoundingClientRect().top+(screen?0:window.scrollY);
     var h=Math.max(260,window.innerHeight-(screen?top:Math.min(top,window.innerHeight*0.6))-(screen?18:44));
@@ -918,8 +915,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   // عدّاد متحرك للأرقام: يعدّ من القيمة القديمة للجديدة
   function setStat(id,v){
     var el=$(id),from=+el.textContent||0;if(from===v&&el.dataset.init) return;el.dataset.init=1;
-    var red=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(red||from===v){el.textContent=v;return}
+    el.textContent=v;return;
     var t0=null,dur=Math.min(700,250+Math.abs(v-from)*60);
     (function step(t){if(!t0)t0=t;var k=Math.min(1,(t-t0)/dur);el.textContent=Math.round(from+(v-from)*(1-Math.pow(1-k,3)));if(k<1)requestAnimationFrame(step);else{el.textContent=v;el.classList.remove('bump');void el.offsetWidth;el.classList.add('bump')}})(performance.now());
     requestAnimationFrame(function(t){});
@@ -1131,6 +1127,25 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('setMenu').hidden){menu(false);$('setBtn').focus()}});
   var savedTheme=null;try{savedTheme=localStorage.getItem('exbTheme')}catch(e){}
   setTheme(savedTheme==='dark');
+  // اتجاه عرض المراحل (أفقي/عمودي) + طي المراحل في العمودي
+  var FOLD={};try{FOLD=JSON.parse(localStorage.getItem('exbFold')||'{}')}catch(e){}
+  function applyFold(){[].forEach.call(document.querySelectorAll('.col[data-stage]'),function(c){c.classList.toggle('folded',!!FOLD[c.dataset.stage])})}
+  function setLayout(v){
+    document.body.classList.toggle('vlay',v);
+    [].forEach.call(document.querySelectorAll('[data-lay]'),function(b){b.setAttribute('aria-pressed',(b.dataset.lay==='v')===v)});
+    try{localStorage.setItem('exbLayout',v?'v':'h')}catch(e){}
+    applyFold();fitCols();
+  }
+  [].forEach.call(document.querySelectorAll('[data-lay]'),function(b){b.onclick=function(e){e.stopPropagation();setLayout(b.dataset.lay==='v')}});
+  $('cols').addEventListener('click',function(e){
+    if(!document.body.classList.contains('vlay')||document.body.classList.contains('screen')) return;
+    var h=e.target.closest('.col-head');if(!h||e.target.closest('button')) return;
+    var c=h.closest('.col');FOLD[c.dataset.stage]=!FOLD[c.dataset.stage];c.classList.toggle('folded',FOLD[c.dataset.stage]);
+    try{localStorage.setItem('exbFold',JSON.stringify(FOLD))}catch(e){}
+  });
+  new MutationObserver(applyFold).observe($('cols'),{childList:true});
+  var savedLay=null;try{savedLay=localStorage.getItem('exbLayout')}catch(e){}
+  setLayout(savedLay==='v');
   $('themeBtn').onclick=function(){setTheme(!document.body.classList.contains('dark'))};
   $('micTop').onclick=function(){$('aiBtn').click();$('aiMic').click()};
   $('fPrec').onclick=function(){var t=($('fTitle').value+' '+$('fNotes').value).trim();runPrec({text:t})};
