@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>ExB</title>
 <meta name="theme-color" content="#101628">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -363,6 +363,11 @@ body.screen .card[data-id]:active{transform:scale(.98)}
 @media (max-width:700px){.simbtn span{display:none}.simbtn{height:38px;padding:0 10px}}
 
 /* ===== تطبيق ExB على الجوال ===== */
+/* تثبيت الشاشة: لا زوم بالأصابع، لا ارتداد، لا سحب جانبي للصفحة */
+html,body{overscroll-behavior:none;overflow-x:hidden;max-width:100%;-webkit-text-size-adjust:100%;touch-action:pan-x pan-y}
+*{-webkit-tap-highlight-color:transparent}
+button,a,select,label,.card,.stat{touch-action:manipulation}
+input,select,textarea{font-size:16px!important}  /* يمنع الآيفون من التكبير التلقائي عند الكتابة */
 body{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
 .topbar{padding-top:calc(18px + env(safe-area-inset-top))!important;margin-top:calc(-22px - env(safe-area-inset-top))!important}
 .brand{background:transparent!important;padding:0!important;box-shadow:none!important;border-radius:22%!important;overflow:hidden}
@@ -557,6 +562,10 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
           :m.indexOf('api:')===0?'اللوحة رفضت: '+m.slice(4)+'. انسخ الرابط من جديد من showLinks.':'تعذّر الاتصال: '+m;
       });
   };
+  // الآيفون يتجاهل منع الزوم أحيانًا، فنمنعه يدويًا
+  ['gesturestart','gesturechange','gestureend'].forEach(function(ev){document.addEventListener(ev,function(e){e.preventDefault()},{passive:false})});
+  document.addEventListener('touchmove',function(e){if(e.touches&&e.touches.length>1)e.preventDefault()},{passive:false});
+  var lastTap=0;document.addEventListener('touchend',function(e){var n=Date.now();if(n-lastTap<300&&!e.target.closest('input,textarea,select'))e.preventDefault();lastTap=n},{passive:false});
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
 })();
 </script>
