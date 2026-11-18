@@ -532,10 +532,25 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     var v=document.getElementById('setupUrl').value.trim(),err=document.getElementById('setupErr');
     try{
       var u=new URL(v),key=(u.searchParams.get('key')||'').replace(/[^a-zA-Z0-9]/g,'');
-      if(!/^https:\/\/script\.google\.com\/macros\/s\/[^/]+\/exec$/.test(u.origin+u.pathname)) throw 0;
+      var api=u.origin+u.pathname.replace(/\/$/,'');
+      if(!/^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[^/]+\/exec$/.test(api)) throw 0;
       if(!key){err.textContent='هذا رابط شاشة العرض. نحتاج رابطك للتعديل اللي فيه key=';return}
-      localStorage.setItem('exb',JSON.stringify({api:u.origin+u.pathname,key:key}));location.reload();
-    }catch(e){err.textContent='الرابط غير صحيح. انسخه كامل من سجل showLinks'}
+    }catch(e){err.textContent='الرابط غير صحيح. انسخه كامل من سجل showLinks';return}
+    var btn=this;btn.disabled=true;btn.textContent='جارٍ التحقق…';err.textContent='';
+    fetch(api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:'getData',args:[key,'']}),redirect:'follow'})
+      .then(function(r){return r.text().then(function(t){return {s:r.status,t:t}})},function(){throw new Error('net')})
+      .then(function(x){
+        var j;try{j=JSON.parse(x.t)}catch(e){throw new Error(/doPost/i.test(x.t)?'nopost':'html')}
+        if(!j.ok) throw new Error('api:'+j.error);
+        localStorage.setItem('exb',JSON.stringify({api:api,key:key}));location.reload();
+      })
+      .catch(function(e){
+        btn.disabled=false;btn.textContent='ابدأ';var m=e.message||'';
+        err.textContent=m==='net'?'ما قدرت أوصل لـ Google. تأكد من الإنترنت، وإن النشر «أي شخص» (Anyone).'
+          :m==='nopost'?'Code.gs القديم لسا منشور: الصق Code-copy.txt الجديد، ثم نشر ← إدارة عمليات النشر ← ✏️ ← إصدار جديد.'
+          :m==='html'?'اللوحة ردّت بصفحة بدل بيانات. غالبًا ما انتشر «إصدار جديد» بعد لصق Code.gs، أو النشر مو «أي شخص».'
+          :m.indexOf('api:')===0?'اللوحة رفضت: '+m.slice(4)+'. انسخ الرابط من جديد من showLinks.':'تعذّر الاتصال: '+m;
+      });
   };
   if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(function(){});
 })();
@@ -561,7 +576,9 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   function call(fn){
     var args=[].slice.call(arguments,1);
     return fetch(CFG.api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:fn,args:args}),redirect:'follow'})
-      .then(function(r){if(!r.ok)throw new Error('تعذّر الاتصال ('+r.status+')');return r.json()})
+      .catch(function(){throw new Error('تعذّر الوصول لـ Google، تأكد من الإنترنت')})
+      .then(function(r){if(!r.ok)throw new Error('تعذّر الاتصال ('+r.status+')');return r.text()})
+      .then(function(t){try{return JSON.parse(t)}catch(e){throw new Error('اللوحة ما ردّت بشكل صحيح. تأكد إنك لصقت Code.gs الجديد ونشرت «إصدار جديد»')}})
       .then(function(j){
         if(!j.ok){if(/غير مصرح|للعرض فقط/.test(j.error||'')){exbReset('المفتاح غير صالح، الصق رابطك المحدّث')}throw new Error(j.error||'خطأ غير معروف')}
         return j.data;
