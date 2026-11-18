@@ -298,6 +298,15 @@ body.screen .card[data-id]:active{transform:scale(.98)}
 .seg button[aria-pressed="true"]{background:#5B4BD6;color:#fff}
 .xnote{font-size:12px;color:var(--card-muted);margin:10px 0 0}
 .tools-row{display:flex;gap:6px;flex-wrap:wrap}
+.upd-last{margin:8px 0 0;font-size:12.5px;line-height:1.6;color:#2B3A5E;padding:6px 10px;border-radius:10px;background:#EEF6F5;border-inline-start:3px solid #14B8A6}
+.upd-last b{color:#0F766E;font-weight:600}
+.upd-add{display:flex;gap:6px;align-items:flex-start}
+.upd-add textarea{flex:1;min-height:44px!important;height:44px;resize:vertical}
+.upd-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;max-height:220px;overflow:auto}
+.upd-list li{position:relative;padding:7px 10px 7px 30px;border-radius:10px;background:var(--card-soft);border:1px solid var(--card-line);font-size:13px;line-height:1.6;color:var(--card-ink);white-space:pre-line}
+.upd-list time{display:block;font-size:11.5px;color:#0F766E;font-weight:600;white-space:nowrap}
+.upd-list .x{position:absolute;left:6px;top:6px;width:22px;height:22px;border:0;border-radius:6px;background:transparent;color:#98A2B3;font-size:15px;line-height:1;cursor:pointer}
+.upd-list .x:hover{background:#FDECEC;color:#B42318}
 .duerow{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .duerow input{height:36px;padding:0 10px;border:1px solid var(--card-line);border-radius:10px;background:var(--card-soft);color:var(--card-ink);font:inherit;font-size:13px;min-width:0}
 .duerow input[type=date]{flex:0 0 150px}.duerow input:not([type]){flex:1 1 140px}
@@ -741,6 +750,8 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
         html+=
           '<dl class="meta"><dt>المسندة إليه</dt><dd>'+esc(x.assignee||'—')+'</dd><dt>الاستلام</dt><dd>'+esc(x.received||'—')+'</dd><dt>التسليم</dt><dd class="'+(late?'late':'')+'">'+due+((x.dueLog||[]).length&&canEdit&&!screen?' <span class="ext" title="عدد مرات تغيير الموعد">مُمدد ×'+x.dueLog.length+'</span>':'')+'</dd></dl>';
         if(triBadge(x)&&x.triageReason) html+='<p class="tri-why">'+esc(x.triageReason)+'</p>';
+        var lu=(x.updates||[]).length?x.updates[x.updates.length-1]:null;
+        if(lu&&canEdit&&!screen&&!open) html+='<p class="upd-last"><b>آخر تحديث · '+esc(ago(lu.on))+'</b><br>'+esc(lu.text)+'</p>';
         if(x.notes&&!open) html+='<p class="note">'+esc(x.notes)+'</p>';
         if(files.length) html+='<div class="files">'+files.map(function(f){return '<a class="file" target="_blank" rel="noopener" href="'+esc(f.url)+'" title="'+esc(f.name)+'">📎 '+esc(f.name)+'</a>'}).join('')+'</div>';
         if(canEdit&&!screen){
@@ -749,6 +760,9 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
             '<label class="l" for="d-'+esc(x.id)+'">موعد التسليم (إعادة جدولة أو تمديد)</label>'+
             '<div class="duerow"><input id="d-'+esc(x.id)+'" type="date" value="'+esc(x.due||'')+'"><input id="r-'+esc(x.id)+'" placeholder="سبب التغيير (اختياري)" maxlength="200"><button type="button" class="sm go" data-act="setDue">حفظ الموعد</button></div>'+
             ((x.dueLog||[]).length?'<ul class="duelog">'+x.dueLog.slice().reverse().map(function(d){return '<li>من <b>'+esc(d.from)+'</b> إلى <b>'+esc(d.to||'بدون موعد')+'</b>'+(d.reason?' · '+esc(d.reason):'')+' <span style="opacity:.7">('+esc(d.on)+')</span></li>'}).join('')+'</ul>':'')+
+            '<label class="l" for="u-'+esc(x.id)+'">التحديثات'+((x.updates||[]).length?' ('+x.updates.length+')':'')+'</label>'+
+            '<div class="upd-add"><textarea id="u-'+esc(x.id)+'" placeholder="وش صار في المهمة؟" maxlength="600"></textarea><button type="button" class="sm go" data-act="addUpd">إضافة</button></div>'+
+            ((x.updates||[]).length?'<ul class="upd-list">'+x.updates.slice().reverse().map(function(u){return '<li><time>'+esc(fmtWhen(u.on))+'</time>'+esc(u.text)+'<button type="button" class="x" data-act="delUpd" data-on="'+esc(u.on)+'" aria-label="حذف التحديث" title="حذف">×</button></li>'}).join('')+'</ul>':'')+
             '<div class="tools-row"><button type="button" class="sm ai" data-act="prec">🔎 مهام مشابهة</button><button type="button" class="sm ai" data-act="draft">✉️ مسودة تحديث لصاحب الطلب</button></div><label class="l" for="n-'+esc(x.id)+'">ملاحظات</label><textarea id="n-'+esc(x.id)+'" data-act="notes" placeholder="أضف ملاحظة">'+esc(x.notes)+'</textarea>'+
             '<label class="attach" for="f-'+esc(x.id)+'">إرفاق ملف</label><input class="sr" id="f-'+esc(x.id)+'" type="file" multiple data-act="files"></div>';
           html+='<div class="actions">';
@@ -807,6 +821,8 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     if(!canEdit||document.body.classList.contains('screen')||x.stage!=='backlog'||!x.triage) return '';
     return x.triage==='attention'?'<span class="tri attention" title="يحتاج قرارك">🔴 يحتاج قرارك</span>':'<span class="tri routine" title="روتيني">🟢 روتيني</span>';
   }
+  function fmtWhen(iso){try{return new Date(iso).toLocaleString('ar-SA-u-nu-latn-ca-gregory',{weekday:'short',day:'numeric',month:'short',hour:'numeric',minute:'2-digit'})}catch(e){return String(iso).slice(0,16).replace('T',' ')}}
+  function ago(iso){var m=Math.round((Date.now()-new Date(iso))/60000);if(isNaN(m))return '';if(m<1)return 'الآن';if(m<60)return 'قبل '+m+' د';var h=Math.round(m/60);if(h<24)return 'قبل '+(h===1?'ساعة':h===2?'ساعتين':h+' ساعات');var d=Math.round(h/24);return 'قبل '+(d===1?'يوم':d===2?'يومين':d+' أيام')}
   function moveTo(x,stage){x.stage=stage;render();return mutate(call('updateTask',KEY,x.id,{stage:stage}))}
 
   function onAction(e){
@@ -830,6 +846,15 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
       if(openId===id){var ta=$('n-'+id);if(ta&&ta.value!==x.notes){x.notes=ta.value;mutate(call('updateTask',KEY,id,{notes:ta.value}))}openId=null}
       else{openId=id;EXPANDED[id]=true}
       render();return;
+    }
+    if(a==='addUpd'){
+      var ta=$('u-'+id),tx=ta.value.trim();if(!tx){ta.focus();toast('اكتب التحديث أولًا');return}
+      x.updates=(x.updates||[]).concat([{on:new Date().toISOString(),text:tx}]);render();toast('انضاف التحديث');
+      return mutate(call('addUpdate',KEY,id,tx));
+    }
+    if(a==='delUpd'){
+      var on=b.dataset.on;x.updates=(x.updates||[]).filter(function(u){return u.on!==on});render();toast('انحذف التحديث');
+      return mutate(call('deleteUpdate',KEY,id,on));
     }
     if(a==='setDue'){
       var nd=$('d-'+id).value,why=$('r-'+id).value.trim();
