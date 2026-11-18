@@ -529,13 +529,17 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   var h=decodeURIComponent((location.hash||'').slice(1));if(h){document.getElementById('setupErr').textContent=h;history.replaceState(null,'',location.pathname)}
   document.getElementById('exbOut').onclick=function(){if(confirm('تبي تبدّل الرابط المحفوظ؟'))exbReset('')};
   document.getElementById('setupGo').onclick=function(){
-    var v=document.getElementById('setupUrl').value.trim(),err=document.getElementById('setupErr');
+    var raw=document.getElementById('setupUrl').value,err=document.getElementById('setupErr');
+    // نلقط الرابط من أي نص ملصوق (حتى لو معه «رابطك للتعديل:» أو مسافات وأسطر)
+    var v=(raw.replace(/\s+/g,' ').match(/https?:\/\/script\.google\.com\/[^\s"'<>،]+/)||[''])[0].replace(/[).,،]+$/,'');
+    var key,api;
     try{
-      var u=new URL(v),key=(u.searchParams.get('key')||'').replace(/[^a-zA-Z0-9]/g,'');
-      var api=u.origin+u.pathname.replace(/\/$/,'');
-      if(!/^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[^/]+\/exec$/.test(api)) throw 0;
-      if(!key){err.textContent='هذا رابط شاشة العرض. نحتاج رابطك للتعديل اللي فيه key=';return}
-    }catch(e){err.textContent='الرابط غير صحيح. انسخه كامل من سجل showLinks';return}
+      var u=new URL(v);key=(u.searchParams.get('key')||'').replace(/[^a-zA-Z0-9]/g,'');
+      api=u.origin+u.pathname.replace(/\/u\/\d+(?=\/)/,'').replace(/\/$/,'');
+    }catch(e){err.textContent=raw.trim()?'ما لقيت رابط Google في النص. انسخ السطر اللي يبدأ بـ https://script.google.com':'الصق الرابط أولًا';return}
+    if(/\/dev$/.test(api)){err.textContent='هذا رابط التجربة (dev). نحتاج رابط النشر اللي ينتهي بـ /exec من showLinks';return}
+    if(!/^https:\/\/script\.google\.com\/(a\/macros\/[^/]+|macros)\/s\/[^/]+\/exec$/.test(api)){err.textContent='الرابط ناقص أو مو رابط اللوحة. لازم يكون فيه /macros/s/…/exec?key=';return}
+    if(!key){err.textContent='هذا رابط شاشة العرض. نحتاج رابطك للتعديل اللي فيه key=';return}
     var btn=this;btn.disabled=true;btn.textContent='جارٍ التحقق…';err.textContent='';
     fetch(api,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:'getData',args:[key,'']}),redirect:'follow'})
       .then(function(r){return r.text().then(function(t){return {s:r.status,t:t}})},function(){throw new Error('net')})
