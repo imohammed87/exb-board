@@ -1716,7 +1716,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     var dOn=P.ontime!==null&&P.ontimePrev!==null?P.ontime-P.ontimePrev:null,dAv=P.avg!==null&&P.avgPrev!==null?Math.round((P.avg-P.avgPrev)*10)/10:null;
     var tiles=[
       ['ontime','الإنجاز في الوقت',P.ontime===null?'—':P.ontime+'%','','#5EEAD4',dOn===null?'لا توجد مقارنة بعد':dOn===0?'بدون تغيير عن '+P.plabel:(dOn>0?'▲ ':'▼ ')+Math.abs(dOn)+' نقطة عن '+P.plabel,dOn===null||dOn===0?'':dOn>0?'up':'dn'],
-      ['avg','متوسط مدة الإنجاز',P.avg===null?'—':P.avg,'يوم','#fff',dAv===null?'من الاستلام حتى الإنجاز':dAv===0?'بدون تغيير':(dAv<0?'▼ أسرع بـ ':'▲ أبطأ بـ ')+Math.abs(dAv)+' يوم',dAv===null||dAv===0?'':dAv<0?'up':'dn'],
+      ['avg','متوسط مدة الإنجاز',P.avg===null?'—':P.avg,'يوم','#fff',P.avg===null?'تظهر بعد إنجاز مهام لها تاريخ استلام':dAv===null?'من الاستلام حتى الإنجاز':dAv===0?'بدون تغيير':(dAv<0?'▼ أسرع بـ ':'▲ أبطأ بـ ')+Math.abs(dAv)+' يوم',dAv===null||dAv===0?'':dAv<0?'up':'dn'],
       ['late','المتأخر الآن',STATS.lateIds.length,'مهام','#FF8A80',STATS.lateCrit?'منها '+STATS.lateCrit+' هامة وعاجلة':'لا يوجد متأخر هام',STATS.lateCrit?'dn':''],
       ['done','المنجز',P.done,'من '+P.recv+' وارد','#fff',P.recv>P.done?'المتبقي '+(P.recv-P.done)+' مفتوحة':'المنجز يغطي الوارد',P.recv>P.done?'':'up']];
     $('kTiles').innerHTML=tiles.map(function(t){return '<button type="button" class="ktile" data-kt="'+t[0]+'"><span class="kl">'+t[1]+'<i>التفاصيل ‹</i></span><span class="kv"><b style="color:'+t[4]+'">'+t[2]+'</b><span>'+esc(t[3])+'</span></span><span class="kn '+t[6]+'">'+esc(t[5])+'</span></button>'}).join('');
