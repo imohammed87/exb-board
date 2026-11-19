@@ -650,6 +650,9 @@ body.screen .kp h3{font-size:21px}body.screen .krow{font-size:16px}body.screen .
 .kgp{display:flex;flex-direction:column;gap:10px;padding:14px 16px;border-radius:14px;background:#fff;border:1px solid #E3E8F1}
 .kgi{display:flex;flex-direction:column;gap:5px;text-align:right;border:0;background:transparent;padding:4px;border-radius:8px;color:inherit}.kgi:hover{background:#F6F4FE}
 .kgi>span{display:flex;justify-content:space-between;gap:8px}.kgb{display:flex;height:8px;border-radius:4px;background:#EEF1F7;overflow:hidden}.kgb i{display:block;height:100%}
+.kgform{display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-radius:14px;background:#fff;border:1px dashed #C9C0F5}.kgform h4{margin:0;font-size:16px;color:#1B2747}
+.kgrow{display:flex;gap:8px;flex-wrap:wrap}.kgrow select,.kgrow input{height:42px;padding:0 12px;border:1px solid #D5DAE6;border-radius:10px;background:#F6F7FB;color:#1B2747}.kgrow select{min-width:170px}.kgrow input{flex:1;min-width:180px}
+.kgact{display:flex;gap:6px;margin-top:-4px}.kgx{border:0;background:transparent;color:#4A2BC2;font-weight:700;font-size:13px;padding:2px 6px}.kgx[data-gd]{color:#B42318}
 .kexp{display:flex;flex-direction:column;gap:16px}.kexp h4{margin:0 0 6px;font-size:16px}
 .kchk{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.kchk label{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid #E3E8F1;font-weight:600}
 .kchk input{width:20px;height:20px;accent-color:#5B4BD6}
@@ -788,7 +791,7 @@ body.dark .gchip{background:#2C2558;color:#CFC4FF}
     <div class="full" style="display:flex;gap:8px;align-items:center">
       <button type="button" class="primary" id="aiGo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.6L18 9.5l-4.2 1.9L12 16l-1.8-4.6L6 9.5l4.2-1.9z"></path><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"></path></svg> حلّل</button>
       <button type="button" class="ghost" id="aiMic" aria-pressed="false" title="سجّل الطلب بصوتك"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg><span>سجّل بصوتك</span></button>
-      <button type="button" class="ghost" id="aiBulk" title="الصق أو اسحب قائمة مهام وتنفصل تلقائيًا">📋 دفعة مهام</button>
+      <button type="button" class="ghost" id="aiBulk" hidden title="الصق أو اسحب قائمة مهام وتنفصل تلقائيًا">📋 دفعة مهام</button>
       <button type="button" class="ghost" id="aiCancel">إلغاء</button>
       <span class="aihint">بيانات الطلب تُرسل لخدمة Claude API لتحليلها. راجع البطاقة قبل الحفظ.</span>
     </div>
@@ -1720,9 +1723,9 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     // الطاقة
     var cap=STATS.cap.slice().sort(function(a,b){return b.pct-a.pct}),over=cap.filter(function(c){return c.pct>100});
     var line=over.length?over.slice(0,3).map(function(c){return c.name+' عند '+c.pct+'%'}).join('، ')+' من طاقته المعتادة · متوسط الفريق '+STATS.team+'%':'الفريق ضمن طاقته المعتادة · متوسط الفريق '+STATS.team+'%';
-    $('kCap').innerHTML='<div class="kph"><h3>الطاقة الاستيعابية للفريق</h3><span class="klg"><span><i style="background:#5EEAD4"></i>مريح</span><span><i style="background:#F2B14C"></i>ممتلئ</span><span><i style="background:#FF8A80"></i>فوق طاقته</span></span></div>'+
-      cap.map(function(c){var z=zone(c.pct);return '<button type="button" class="krow" data-kc="'+esc(c.name)+'"><span class="kn1">'+esc(c.name)+'</span><span class="kbar"><i style="width:'+(Math.min(c.pct,160)/160*100)+'%;background:'+z[1]+'"></i><u></u></span><b style="color:'+z[1]+'">'+c.pct+'%</b><small>'+c.open+' مهام</small></button>'}).join('')+
-      '<button type="button" class="kai" id="kAiBtn"'+(canEdit?'':' disabled')+'><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B9A9FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/></svg><span>'+esc(line)+'</span>'+(canEdit?'<em>الاقتراحات ←</em>':'')+'</button>';
+    $('kCap').innerHTML='<div class="kph"><h3>الطاقة الاستيعابية للفريق <small style="font-weight:500;color:var(--muted);font-size:12px">من المهام قيد التنفيذ والمنجز</small></h3><span class="klg"><span><i style="background:#5EEAD4"></i>مريح</span><span><i style="background:#F2B14C"></i>ممتلئ</span><span><i style="background:#FF8A80"></i>فوق طاقته</span></span></div>'+
+      cap.map(function(c){var z=zone(c.pct);return '<button type="button" class="krow" data-kc="'+esc(c.name)+'"><span class="kn1">'+esc(c.name)+'</span><span class="kbar"><i style="width:'+(Math.min(c.pct,160)/160*100)+'%;background:'+z[1]+'"></i><u></u></span><b style="color:'+z[1]+'">'+c.pct+'%</b><small>'+c.open+' تنفيذ</small></button>'}).join('')+
+      '<button type="button" class="kai" id="kAiBtn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#B9A9FF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/></svg><span>'+esc(line)+'</span><em>الاقتراحات ←</em></button>';
     // الوارد مقابل المنجز
     var S=P.series,mx=Math.max.apply(null,S.inN.concat(S.doneN,[1]));
     $('kTrend').innerHTML='<div class="kph"><h3>الوارد مقابل المنجز · '+(KPER==='week'?'آخر 8 أيام عمل':KPER==='month'?'آخر 8 أسابيع':'آخر 8 أشهر')+'</h3><span class="klg"><span><i style="background:#6E7BA8"></i>وارد</span><span><i style="background:#5EEAD4"></i>منجز</span></span></div>'+
@@ -1778,16 +1781,22 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
       if(k==='avg') return kList('مدة الإنجاز','من الاستلام حتى الإنجاز · '+P.label,P.doneIds,'dur');
       if(k==='late') return kList('المتأخر الآن',STATS.lateIds.length+' مهام تجاوزت موعدها',STATS.lateIds,'');
       return kList('المنجز',P.label,P.doneIds,'')}
-    if(b.dataset.kc){var c=capOf(b.dataset.kc);if(c){var z=zone(c.pct);kList('مهام '+c.name,'الطاقة '+c.pct+'% ('+z[0]+') · متوسط الفريق '+STATS.team+'% · '+c.open+' مفتوحة · '+c.late+' متأخرة',c.ids,'')}return}
+    if(b.dataset.kc){var c=capOf(b.dataset.kc);if(c){var z=zone(c.pct);kList('مهام '+c.name+' قيد التنفيذ','الطاقة '+c.pct+'% ('+z[0]+') · متوسط الفريق '+STATS.team+'% · '+c.open+' قيد التنفيذ · '+c.late+' متأخرة',c.ids,'')}return}
     if(b.dataset.ks){var s=STATS.stages.filter(function(x){return x.stage===b.dataset.ks})[0];return kList(STAGE[s.stage],s.n+' مهام'+(s.stuck?' · '+s.stuck+' بدون تحديث أكثر من 7 أيام':''),s.stuckIds.concat(s.ids.filter(function(i){return s.stuckIds.indexOf(i)<0})),'')}
     if(b.dataset.kd) return kDetail(b.dataset.kd,false);
-    if(b.id==='kAiBtn'&&canEdit) return kAi(false);
+    if(b.id==='kAiBtn') return kAi(false);
     if(b.id==='kGoalsBtn') return kGoals();
     if(b.id==='kExportBtn') return kExport();
   });
   $('kxBody').addEventListener('click',function(e){
     var b=e.target.closest('button');if(!b) return;
     if(b.dataset.kd) return kDetail(b.dataset.kd,!!b.dataset.from);
+    if(b.dataset.ge){var g0=STATS.goals[+b.dataset.ge];GEDIT={row:g0.row,who:g0.who,goal:g0.goal,kws:g0.kws||[]};kGoals();$('gGoal').focus();return}
+    if(b.dataset.gd){var g1=STATS.goals[+b.dataset.gd];if(!confirm('حذف الهدف «'+g1.goal+'»؟ المهام المرتبطة فيه بتنفك عنه.'))return;
+      return call('deleteGoal',KEY,g1.row).then(function(d){apply(d);toast('انحذف الهدف');kGoals()}).catch(fail)}
+    if(b.id==='gCancel'){GEDIT=null;return kGoals()}
+    if(b.id==='gSave'){var who=$('gWho').value,goal=$('gGoal').value.trim();if(!who||!goal){toast('اختر الموظف واكتب الهدف');return}
+      b.disabled=true;return call('saveGoal',KEY,{row:GEDIT?GEDIT.row:0,who:who,goal:goal,kws:$('gKws').value}).then(function(d){var ed=!!GEDIT;GEDIT=null;apply(d);toast(ed?'انحفظ التعديل':'انضاف الهدف');kGoals()}).catch(function(err){b.disabled=false;fail(err)})}
     if(b.dataset.gl){var g=STATS.goals[+b.dataset.gl];if(g)kList(g.goal,g.who+' · '+g.done+' من '+g.linked+' منجزة',g.ids,'');return}
     if(b.dataset.rec!=null) return recAct(+b.dataset.rec,b.dataset.how);
     if(b.id==='kRecRefresh') return kAi(true);
@@ -1800,18 +1809,18 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   // ----- الطاقة: الاقتراحات -----
   function kAi(force){
     var cap=STATS.cap.slice().sort(function(a,b){return b.pct-a.pct});
-    var top='<div class="kcap">'+cap.map(function(c){var z=zone(c.pct);return '<div style="--c:'+z[1]+'"><span><b>'+esc(c.name)+'</b><b style="font-size:20px;color:'+z[2]+'">'+c.pct+'%</b></span><small>'+c.open+' مهام · ينجز '+c.rate+' بالأسبوع</small><small style="color:'+z[2]+';font-weight:700">'+z[0]+'</small></div>'}).join('')+'</div>';
-    var foot='<p style="margin:0;color:#5A6580;font-size:14px;line-height:1.6">الطاقة = حمل المهام المفتوحة (العاجل والمتأخر أثقل) مقارنة بما ينجزه الشخص عادة في 3 أسابيع، من آخر 8 أسابيع. لا تُقترح نقل مهام بين الموظفين، ولا يُنفّذ شي إلا بعد اعتمادك.</p>';
+    var top='<div class="kcap">'+cap.map(function(c){var z=zone(c.pct);return '<div style="--c:'+z[1]+'"><span><b>'+esc(c.name)+'</b><b style="font-size:20px;color:'+z[2]+'">'+c.pct+'%</b></span><small>'+c.open+' قيد التنفيذ · ينجز '+c.rate+' بالأسبوع</small><small style="color:'+z[2]+';font-weight:700">'+z[0]+'</small></div>'}).join('')+'</div>';
+    var foot='<p style="margin:0;color:#5A6580;font-size:14px;line-height:1.6">الطاقة = حمل المهام قيد التنفيذ (العاجل والمتأخر أثقل) مقارنة بما ينجزه الشخص عادة في 3 أسابيع، من المنجز في آخر 8 أسابيع. لا تُقترح نقل مهام بين الموظفين، ولا يُنفّذ شي إلا بعد اعتمادك.</p>';
     kOpen('الطاقة الاستيعابية للفريق','متوسط الفريق '+STATS.team+'%',top+'<h4 style="margin:4px 0 0;font-size:18px;color:#1B2747">اقتراحات لتخفيف الضغط · داخل نطاق عمل كل شخص</h4><div id="kRecs"><p class="kwait">جاري تجهيز الاقتراحات…</p></div>'+foot,false);
-    call('aiCapacity',KEY,!!force).then(function(r){CAPR=r;paintRecs()}).catch(function(err){var el=$('kRecs');if(el)el.innerHTML='<p class="kerr">'+esc((err&&err.message)||'تعذّر تجهيز الاقتراحات')+'</p>'});
+    (canEdit?call('aiCapacity',KEY,!!force):call('capRecsView',KEY,VIEW)).then(function(r){CAPR=r;paintRecs()}).catch(function(err){var el=$('kRecs');if(el)el.innerHTML='<p class="kerr">'+esc((err&&err.message)||'تعذّر تجهيز الاقتراحات')+'</p>'});
   }
   function paintRecs(){
     var el=$('kRecs');if(!el||!CAPR) return;
     if(!CAPR.recs.length){el.innerHTML='<p class="kwait">ما فيه أحد فوق طاقته، ما يحتاج اقتراحات الحين.</p>';return}
     el.innerHTML=CAPR.recs.map(function(r,i){var s=CAPR.status[i],lab=r.type==='extend'?'جهّز طلب تمديد':'أضفها لموجز الصباح';
       return '<div class="krec"><div><em>'+esc(r.who)+' · '+r.pct+'%</em><b>'+esc(r.title)+'</b><small>'+esc(r.why)+'</small></div>'+
-        (s?'<span class="ktag '+(s==='ok'?'t-ok':'t-info')+'">'+(s==='ok'?(r.type==='extend'?'المسودة جاهزة ✓':'في موجز الصباح ✓'):'تم التجاهل')+'</span>':'<button type="button" class="kok" data-rec="'+i+'" data-how="ok">'+lab+'</button><button type="button" class="kno" data-rec="'+i+'" data-how="skip">تجاهل</button>')+'</div>'}).join('')+
-      '<button type="button" class="kno" id="kRecRefresh" style="align-self:flex-start">تحديث الاقتراحات</button>';
+        (!canEdit?(s?'<span class="ktag '+(s==='ok'?'t-ok':'t-info')+'">'+(s==='ok'?'معتمد ✓':'تم التجاهل')+'</span>':''):s?'<span class="ktag '+(s==='ok'?'t-ok':'t-info')+'">'+(s==='ok'?(r.type==='extend'?'المسودة جاهزة ✓':'في موجز الصباح ✓'):'تم التجاهل')+'</span>':'<button type="button" class="kok" data-rec="'+i+'" data-how="ok">'+lab+'</button><button type="button" class="kno" data-rec="'+i+'" data-how="skip">تجاهل</button>')+'</div>'}).join('')+
+      (canEdit?'<button type="button" class="kno" id="kRecRefresh" style="align-self:flex-start">تحديث الاقتراحات</button>':'');
   }
   function recAct(i,how){
     var r=CAPR&&CAPR.recs[i];if(!r) return;
@@ -1823,13 +1832,24 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   }
 
   // ----- الأهداف السنوية -----
+  var GEDIT=null;
+  function goalForm(){
+    if(!canEdit) return '';
+    var e=GEDIT||{who:'',goal:'',kws:[]};
+    return '<div class="kgform"><h4>'+(GEDIT?'تعديل الهدف':'إضافة هدف سنوي')+'</h4><div class="kgrow">'+
+      '<label class="sr" for="gWho">الموظف</label><select id="gWho"><option value="">الموظف…</option>'+(PEOPLE||[]).map(function(n){return '<option'+(samePer(n,e.who)?' selected':'')+'>'+esc(n)+'</option>'}).join('')+'</select>'+
+      '<label class="sr" for="gGoal">الهدف</label><input id="gGoal" placeholder="الهدف، مثال: رفع جودة التقارير التنفيذية" value="'+esc(e.goal)+'" maxlength="160">'+
+      '<label class="sr" for="gKws">الكلمات المفتاحية</label><input id="gKws" placeholder="الكلمات المفتاحية: تقرير، أداء، عرض" value="'+esc((e.kws||[]).join('، '))+'">'+
+      '<button type="button" class="kok" id="gSave">'+(GEDIT?'حفظ التعديل':'إضافة')+'</button>'+(GEDIT?'<button type="button" class="kno" id="gCancel">إلغاء</button>':'')+'</div></div>';
+  }
   function kGoals(){
     var G=(STATS&&STATS.goals)||[];
+    if(!G.length&&canEdit){kOpen('الأهداف السنوية','أضف أهداف الزملاء، وتنربط المهام فيها تلقائيًا من الكلمات المفتاحية',goalForm(),false);return}
     if(!G.length){kOpen('الأهداف السنوية','',canEdit?'<p style="margin:0;font-size:17px;line-height:1.8;color:#1B2747">ما فيه أهداف مسجلة. افتح ملف Google Sheet، وورقة «الأهداف»، واكتب كل هدف بسطر: <b>الموظف</b> | <b>الهدف</b> | <b>الكلمات المفتاحية</b> (افصل بينها بفاصلة).<br>إذا الورقة غير موجودة شغّل الدالة <b>setupGoals</b> مرة وحدة من Apps Script.</p>':'<p class="kwait">ما فيه أهداف مسجلة.</p>',false);return}
     var by={};G.forEach(function(g,i){(by[g.who]=by[g.who]||[]).push([g,i])});
     var none=G.filter(function(g){return !g.linked}).length;
-    kOpen('الأهداف السنوية للفريق','نسبة تقدم كل هدف من مهامه المرتبطة'+(none?' · '+none+' بدون مهام مرتبطة':''),'<div class="kgl">'+Object.keys(by).map(function(w){return '<div class="kgp"><b style="font-size:18px;color:#1B2747">'+esc(w)+'</b>'+by[w].map(function(a){var g=a[0],v=g.linked?Math.round(100*g.done/g.linked):0;
-      return '<button type="button" class="kgi" data-gl="'+a[1]+'"'+(g.linked?'':' disabled')+'><span><span style="font-weight:600;color:#1B2747">'+esc(g.goal)+'</span><b style="color:'+(!g.linked?'#8A5A00':v>=60?'#16723F':'#4A2BC2')+'">'+(g.linked?v+'%':'—')+'</b></span><span class="kgb"><i style="width:'+v+'%;background:'+(v>=60?'#1F9D57':'#6A4BD8')+'"></i></span><small style="color:'+(g.linked?'#5A6580':'#8A5A00')+'">'+(g.linked?g.done+' من '+g.linked+' منجزة':'لا توجد مهام مرتبطة بهذا الهدف هذه السنة')+'</small></button>'}).join('')+'</div>'}).join('')+'</div>'+
+    kOpen('الأهداف السنوية للفريق','نسبة تقدم كل هدف من مهامه المرتبطة'+(none?' · '+none+' بدون مهام مرتبطة':''),goalForm()+'<div class="kgl">'+Object.keys(by).map(function(w){return '<div class="kgp"><b style="font-size:18px;color:#1B2747">'+esc(w)+'</b>'+by[w].map(function(a){var g=a[0],v=g.linked?Math.round(100*g.done/g.linked):0;
+      return '<button type="button" class="kgi" data-gl="'+a[1]+'"'+(g.linked?'':' disabled')+'><span><span style="font-weight:600;color:#1B2747">'+esc(g.goal)+'</span><b style="color:'+(!g.linked?'#8A5A00':v>=60?'#16723F':'#4A2BC2')+'">'+(g.linked?v+'%':'—')+'</b></span><span class="kgb"><i style="width:'+v+'%;background:'+(v>=60?'#1F9D57':'#6A4BD8')+'"></i></span><small style="color:'+(g.linked?'#5A6580':'#8A5A00')+'">'+(g.linked?g.done+' من '+g.linked+' منجزة':'لا توجد مهام مرتبطة بهذا الهدف هذه السنة')+'</small></button>'+(canEdit?'<span class="kgact"><button type="button" class="kgx" data-ge="'+a[1]+'">تعديل</button><button type="button" class="kgx" data-gd="'+a[1]+'">حذف</button></span>':'')}).join('')+'</div>'}).join('')+'</div>'+
       '<p style="margin:0;color:#5A6580;font-size:14px;line-height:1.6">تُربط المهمة بالهدف من كلماتها المفتاحية وعنوانها ووصفها، وتقدر تغيّر الربط من تفاصيل البطاقة.</p>',false);
   }
 
