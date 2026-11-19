@@ -237,6 +237,16 @@ body:not(.screen) .stack::-webkit-scrollbar-thumb{background:rgba(139,124,255,.5
 body:not(.screen) .wrap{padding-bottom:24px}
 .col{min-height:0}
 .stack>*{flex-shrink:0}
+/* الهام والعاجل مثبّت أعلى العمود */
+.pin{display:flex;flex-direction:column;gap:10px;max-height:46vh;overflow-y:auto;overflow-x:hidden;padding-bottom:12px;margin-bottom:10px;border-bottom:2px dashed rgba(255,138,128,.55);scrollbar-width:none}
+.pin::-webkit-scrollbar{display:none}
+.pin>*{flex-shrink:0}
+.pin::before{content:"📌 هام وعاجل";font-size:12px;font-weight:700;color:#FFB4AC;letter-spacing:.2px}
+body.screen .pin{gap:7px}
+body.screen .pin::before{font-size:16px}
+body.vlay:not(.screen) .pin{max-height:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;align-items:start}
+body.vlay:not(.screen) .pin::before{grid-column:1/-1}
+body.vlay:not(.screen) .col.folded .pin{display:none}
 
 /* بطاقات مطوية تتمدد بالضغط */
 .card.expandable{cursor:pointer}
@@ -527,10 +537,10 @@ body.screen .fbar button{font-size:20px;padding:10px 18px}
 body.screen .col{position:relative}
 body.screen .wrap{padding-bottom:12px!important}
 body.screen{overflow:hidden}
-.vbar{position:absolute;left:10px;width:18px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(167,139,250,.3);cursor:pointer;touch-action:none}
+.vbar{position:absolute;right:10px;width:18px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(167,139,250,.3);cursor:pointer;touch-action:none}
 .vthumb{position:absolute;left:2px;right:2px;top:0;border-radius:8px;background:linear-gradient(180deg,#A78BFA,#6A3CF0);box-shadow:0 0 12px rgba(124,92,235,.5);cursor:grab;touch-action:none}
 .vthumb.on{cursor:grabbing;background:linear-gradient(180deg,#C4B5FD,#7C5CEB)}
-body.screen .stack.hasbar{padding-left:30px}
+body.screen .stack.hasbar,body.screen .col.hasbar .pin{padding-right:30px}
 </style>
 </head>
 <body>
@@ -836,8 +846,8 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     var top=$('board').getBoundingClientRect().top+(screen?0:window.scrollY);
     var h=Math.max(260,window.innerHeight-(screen?top:Math.min(top,window.innerHeight*0.6))-(screen?18:44));
     [].forEach.call(document.querySelectorAll('.col'),function(col){
-      var head=col.querySelector('.col-head'),st=col.querySelector('.stack');
-      var hh=Math.max(140,h-head.offsetHeight-28)+'px';
+      var head=col.querySelector('.col-head'),st=col.querySelector('.stack'),pin=col.querySelector('.pin');
+      var hh=Math.max(140,h-head.offsetHeight-28-(pin?pin.offsetHeight+10:0))+'px';
       if(screen){st.style.height='';st.style.maxHeight=hh}else{st.style.maxHeight='';st.style.height=hh}
       if(keep&&keep[col.dataset.stage]) st.scrollTop=keep[col.dataset.stage];
     });
@@ -858,7 +868,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
       var st=col.querySelector('.stack');if(!st) return;
       var bar=col.querySelector('.vbar');
       var need=st.scrollHeight-st.clientHeight>4;
-      st.classList.toggle('hasbar',need);
+      st.classList.toggle('hasbar',need);col.classList.toggle('hasbar',need);
       if(!need){if(bar)bar.remove();return}
       if(!bar){
         bar=document.createElement('div');bar.className='vbar';bar.innerHTML='<div class="vthumb"></div>';
@@ -934,9 +944,13 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
       var dense=screen&&list.length>DENSE_AT;
       var untri=c.id==='backlog'&&canEdit&&!screen?list.filter(function(x){return !x.triage}).length:0;
       html+='<section class="col '+c.id+(dense?' dense':'')+'" data-stage="'+c.id+'"><div class="col-head"><div><h2>'+c.name+'</h2><span class="en" lang="en">'+c.en+'</span></div><span class="hr">'+(untri?'<button type="button" class="tri-btn" data-act="triage" title="يفرز الوكيل الطلبات غير المفروزة: روتيني أو يحتاج قرارك"'+(triaging?' disabled':'')+'>'+(triaging?'جارٍ الفرز…':'✨ فرز ('+untri+')')+'</button>':'')+'<span class="n">'+list.length+'</span></span></div>';
-      html+='<div class="stack">';
+      // الهام/العاجل يثبت أعلى العمود، والباقي يتمرر تحته
+      var nUrg=list.filter(function(x){return x.priority==='critical'||x.priority==='important'}).length;
+      var pinIt=c.id!=='done'&&nUrg>0&&list.length>nUrg;
+      html+=pinIt?'<div class="pin" aria-label="هام وعاجل، مثبّت أعلى العمود">':'<div class="stack">';
       if(!list.length) html+='<p class="empty">'+(ready?c.empty:'جارٍ التحميل…')+'</p>';
-      list.forEach(function(x){
+      list.forEach(function(x,ix){
+        if(pinIt&&ix===nUrg) html+='</div><div class="stack">';
         var late=x.due&&x.due<today&&x.stage!=='done',p=pri(x.priority),open=openId===x.id&&!screen;
         var age=x.received?days(x.received,today):0,files=x.files||[];
         var due=!x.due?'بدون موعد':late?esc(x.due)+' (متأخر)':x.due===today?'اليوم':esc(x.due);
