@@ -478,6 +478,32 @@ body.vlay:not(.screen) .col.folded .stack{display:none}
 .seg2 button{font:inherit;font-size:13px;padding:5px 12px;border:0;background:transparent;color:#C9C1EC;cursor:pointer}
 .seg2 button[aria-pressed="true"]{background:#6A3CF0;color:#fff}
 .setrow.static{cursor:default}.setrow.static:hover{background:transparent}
+
+/* ===== دفعة مهام ===== */
+.xm.wide .dcard{width:min(1240px,96vw)}
+.drop{border:2px dashed #B9A8F5;border-radius:18px;padding:14px;background:#F7F4FF;transition:background .15s,border-color .15s}
+.drop.over{background:#ECE6FF;border-color:#6A3CF0}
+.drop textarea{width:100%;box-sizing:border-box;min-height:220px;border:0;background:transparent;font:inherit;font-size:14.5px;line-height:1.7;resize:vertical;color:var(--card-ink);outline:none}
+.drophint{margin:6px 0 0;font-size:13px;color:var(--card-muted)}
+.linkbtn{color:#5B2FD6;font-weight:700;cursor:pointer;text-decoration:underline}
+.btools{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:4px 0 12px}
+.btools input,.btools select,.btbl input,.btbl select{font:inherit;font-size:13px;height:34px;padding:0 8px;border:1px solid var(--card-line);border-radius:9px;background:var(--card-soft);color:var(--card-ink);min-width:0}
+.btools .grp{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px 10px;border-radius:12px;background:#F2EEFF}
+.btools .lbl{font-size:12.5px;color:var(--card-muted);font-weight:600}
+.bwrap{max-height:52vh;overflow:auto;border:1px solid var(--card-line);border-radius:14px}
+.btbl{width:100%;border-collapse:collapse;font-size:13px}
+.btbl th{position:sticky;top:0;background:#EEF1F8;color:#3A4766;font-weight:700;text-align:right;padding:8px 6px;z-index:1;white-space:nowrap}
+.btbl td{padding:5px 6px;border-top:1px solid var(--card-line);vertical-align:middle}
+.btbl tr.off td{opacity:.45}
+.btbl td.t input{width:100%;min-width:220px}
+.btbl td.a input{width:130px}
+.btbl input[type=date]{width:140px}
+.btbl .rm{border:0;background:transparent;color:#98A2B3;font-size:18px;cursor:pointer}
+.bfoot{display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap}
+.bcount{font-size:13px;color:var(--card-muted)}
+body.dark .drop{background:#1F2547;border-color:#4C3F8F}
+body.dark .btools .grp{background:#2A2350}
+body.dark .btbl th{background:#232B4F;color:#DCE3F5}
 </style>
 </head>
 <body>
@@ -579,6 +605,7 @@ body.vlay:not(.screen) .col.folded .stack{display:none}
     <div class="full" style="display:flex;gap:8px;align-items:center">
       <button type="button" class="primary" id="aiGo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.6L18 9.5l-4.2 1.9L12 16l-1.8-4.6L6 9.5l4.2-1.9z"></path><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"></path></svg> حلّل</button>
       <button type="button" class="ghost" id="aiMic" aria-pressed="false" title="سجّل الطلب بصوتك"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg><span>سجّل بصوتك</span></button>
+      <button type="button" class="ghost" id="aiBulk" title="الصق أو اسحب قائمة مهام والوكيل يفصلها">📋 دفعة مهام</button>
       <button type="button" class="ghost" id="aiCancel">إلغاء</button>
       <span class="aihint">بيانات الطلب تُرسل لخدمة Claude API لتحليلها. راجع البطاقة قبل الحفظ.</span>
     </div>
@@ -1120,7 +1147,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
 
   /* ===== أدوات الوكيل ===== */
   function xOpen(t,h){$('xTitle').textContent=t;$('xBody').innerHTML=h;$('xm').hidden=false;$('xClose').focus()}
-  function xClose(){$('xm').hidden=true;if(rec)try{rec.stop()}catch(e){}}
+  function xClose(){$('xm').hidden=true;$('xm').classList.remove('wide');if(rec)try{rec.stop()}catch(e){}}
   $('xClose').onclick=xClose;
   $('xm').addEventListener('click',function(e){if(e.target===this)xClose()});
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&!$('xm').hidden)xClose()});
@@ -1205,6 +1232,100 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   setLayout(savedLay==='v');
   $('themeBtn').onclick=function(){setTheme(!document.body.classList.contains('dark'))};
   $('micTop').onclick=function(){$('aiBtn').click();$('aiMic').click()};
+
+  /* ===== دفعة مهام ===== */
+  var BULK=[],BQ='';
+  var PRIK=['critical','important','high','normal','low'];
+  function bulkStep1(){
+    $('xm').classList.add('wide');
+    xOpen('دفعة مهام','<p class="xsub">الصق المهام كما هي: قائمة، جدول، رسائل، ملاحظات اجتماع. أو اسحب ملف نصي أو CSV أو Excel وأفلته هنا. الوكيل يفصلها ويرتبها، وبعدها تراجعها وتضيفها مرة وحدة.</p>'+
+      '<div class="drop" id="bDrop"><textarea id="bText" placeholder="مثال:&#10;- تجهيز عرض زيارة الوفد قبل الأحد - فريق الاتصال&#10;- تقرير الربع الثالث (تم استلامه)&#10;- حجز قاعة اجتماع المجلس 25 نوفمبر"></textarea>'+
+      '<p class="drophint">أو اسحب ملفًا وأفلته هنا · <label class="linkbtn">اختر ملف<input type="file" id="bFile" accept=".txt,.csv,.tsv,.xlsx,.xls" hidden></label></p></div>'+
+      '<div class="bfoot"><button type="button" class="sm go" id="bGo">✨ رتّبها</button><span class="bcount" id="bMsg"></span></div>');
+    var d=$('bDrop');
+    ['dragenter','dragover'].forEach(function(ev){d.addEventListener(ev,function(e){e.preventDefault();d.classList.add('over')})});
+    ['dragleave','drop'].forEach(function(ev){d.addEventListener(ev,function(e){e.preventDefault();d.classList.remove('over')})});
+    d.addEventListener('drop',function(e){var f=e.dataTransfer&&e.dataTransfer.files;if(f&&f.length)readBulkFiles(f)});
+    $('bFile').onchange=function(){readBulkFiles(this.files)};
+    $('bGo').onclick=bulkExtract;
+    setTimeout(function(){$('bText').focus()},50);
+  }
+  function loadXLSX(){
+    if(window.XLSX) return Promise.resolve();
+    return new Promise(function(res,rej){var sc=document.createElement('script');sc.src='https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';sc.onload=res;sc.onerror=function(){rej(new Error('تعذّر تحميل قارئ Excel'))};document.head.appendChild(sc)});
+  }
+  function readBulkFiles(files){
+    var msg=$('bMsg');msg.textContent='جارٍ قراءة الملف…';
+    var jobs=[].slice.call(files).map(function(f){
+      if(/\.(xlsx|xls)$/i.test(f.name)) return loadXLSX().then(function(){return f.arrayBuffer()}).then(function(buf){var wb=XLSX.read(buf,{type:'array',cellDates:true});return wb.SheetNames.map(function(n){return XLSX.utils.sheet_to_csv(wb.Sheets[n],{FS:' | ',blankrows:false,dateNF:'yyyy-mm-dd'})}).join('\n')});
+      return f.text();
+    });
+    Promise.all(jobs).then(function(txts){
+      var t=$('bText');t.value=(t.value?t.value.replace(/\s*$/,'\n'):'')+txts.join('\n').trim();msg.textContent='تمت القراءة، اضغط «رتّبها»';
+    }).catch(function(e){msg.textContent=(e&&e.message)||'تعذّر قراءة الملف'});
+  }
+  function bulkExtract(){
+    var txt=$('bText').value.trim();if(!txt){$('bText').focus();return}
+    var b=$('bGo');b.disabled=true;$('bMsg').textContent='الوكيل يرتب المهام…';
+    call('aiBulkExtract',KEY,txt).then(function(list){
+      BULK=list.map(function(t){t.sel=true;t.received=t.received||today;t.source='بريد';return t});BQ='';
+      if(!BULK.length){b.disabled=false;$('bMsg').textContent='ما لقيت مهام في النص';return}
+      bulkStep2();
+    }).catch(function(e){b.disabled=false;$('bMsg').textContent=(e&&e.message)||'تعذّر الترتيب'});
+  }
+  function stageOpts(v,blank){return (blank?'<option value="">المرحلة…</option>':'')+COLS.map(function(c){return '<option value="'+c.id+'"'+(c.id===v?' selected':'')+'>'+c.name+'</option>'}).join('')}
+  function priOpts(v,blank){return (blank?'<option value="">الأهمية…</option>':'')+PRIK.map(function(k){return '<option value="'+k+'"'+(k===v?' selected':'')+'>'+pri(k)[0]+'</option>'}).join('')}
+  function bVisible(t){return !BQ||(t.title+' '+t.assignee+' '+t.requester).indexOf(BQ)>-1}
+  function bulkStep2(){
+    $('xTitle').textContent='راجع المهام قبل الإضافة';
+    $('xBody').innerHTML='<div class="btools">'+
+      '<input id="bQ" type="search" placeholder="فلترة بالاسم أو المسؤول" style="flex:1;min-width:160px">'+
+      '<div class="grp"><span class="lbl">على المحدد:</span><select id="bSetStage">'+stageOpts('',1)+'</select><select id="bSetPri">'+priOpts('',1)+'</select>'+
+      '<span class="lbl">استلام</span><input type="date" id="bSetRecv"><span class="lbl">موعد</span><input type="date" id="bSetDue"><button type="button" class="sm" id="bApply">تطبيق</button></div></div>'+
+      '<div class="bwrap"><table class="btbl"><thead><tr><th><input type="checkbox" id="bAll" checked aria-label="تحديد الكل"></th><th>المهمة</th><th>المسندة إليه</th><th>الأهمية</th><th>الاستلام</th><th>الموعد</th><th>المرحلة</th><th></th></tr></thead><tbody id="bBody"></tbody></table></div>'+
+      '<div class="bfoot"><button type="button" class="sm go" id="bAdd"></button><button type="button" class="sm" id="bBack">رجوع للنص</button><span class="bcount" id="bCount"></span></div>';
+    bRender();
+    $('bQ').oninput=function(){BQ=this.value.trim();bRender()};
+    $('bAll').onchange=function(){var on=this.checked;BULK.forEach(function(t){if(bVisible(t))t.sel=on});bRender()};
+    $('bApply').onclick=function(){
+      var st=$('bSetStage').value,pr=$('bSetPri').value,rc=$('bSetRecv').value,du=$('bSetDue').value,n=0;
+      if(!st&&!pr&&!rc&&!du){toast('اختر شيئًا لتطبيقه');return}
+      BULK.forEach(function(t){if(t.sel&&bVisible(t)){if(st)t.stage=st;if(pr)t.priority=pr;if(rc)t.received=rc;if(du)t.due=du;n++}});
+      bRender();toast('طُبّق على '+n+' مهمة');
+    };
+    $('bBody').addEventListener('input',bEdit);$('bBody').addEventListener('change',bEdit);
+    $('bBody').addEventListener('click',function(e){var r=e.target.closest('.rm');if(!r)return;BULK.splice(+r.dataset.i,1);bRender()});
+    $('bBack').onclick=function(){var keep=BULK.map(function(t){return t.title}).join('\n');bulkStep1();$('bText').value=keep};
+    $('bAdd').onclick=bulkAdd;
+  }
+  function bEdit(e){
+    var el=e.target,i=+el.dataset.i,k=el.dataset.k;if(isNaN(i)||!k||!BULK[i])return;
+    BULK[i][k]=el.type==='checkbox'?el.checked:el.value;
+    if(k==='sel'){el.closest('tr').classList.toggle('off',!el.checked);bCount()}
+  }
+  function bCount(){var n=BULK.filter(function(t){return t.sel}).length;$('bAdd').textContent='إضافة المحدد إلى اللوحة ('+n+')';$('bAdd').disabled=!n;$('bCount').textContent=BULK.length+' مهمة · محدد '+n}
+  function bRender(){
+    $('bBody').innerHTML=BULK.map(function(t,i){
+      if(!bVisible(t)) return '';
+      return '<tr class="'+(t.sel?'':'off')+'"><td><input type="checkbox" data-i="'+i+'" data-k="sel"'+(t.sel?' checked':'')+' aria-label="تحديد"></td>'+
+        '<td class="t"><input data-i="'+i+'" data-k="title" value="'+esc(t.title)+'" title="'+esc(t.notes||'')+'"></td>'+
+        '<td class="a"><input data-i="'+i+'" data-k="assignee" value="'+esc(t.assignee||'')+'"></td>'+
+        '<td><select data-i="'+i+'" data-k="priority">'+priOpts(t.priority)+'</select></td>'+
+        '<td><input type="date" data-i="'+i+'" data-k="received" value="'+esc(t.received||'')+'"></td>'+
+        '<td><input type="date" data-i="'+i+'" data-k="due" value="'+esc(t.due||'')+'"></td>'+
+        '<td><select data-i="'+i+'" data-k="stage">'+stageOpts(t.stage)+'</select></td>'+
+        '<td><button type="button" class="rm" data-i="'+i+'" title="حذف من الدفعة" aria-label="حذف">×</button></td></tr>';
+    }).join('');
+    bCount();
+  }
+  function bulkAdd(){
+    var list=BULK.filter(function(t){return t.sel&&String(t.title||'').trim()}).map(function(t){return {title:t.title,requester:t.requester,assignee:t.assignee,priority:t.priority,received:t.received,due:t.due,stage:t.stage,notes:t.notes,source:t.source}});
+    if(!list.length) return;
+    var b=$('bAdd');b.disabled=true;b.textContent='جارٍ الإضافة…';
+    call('addTasksBulk',KEY,list).then(function(d){apply(d);xClose();$('xm').classList.remove('wide');$('aiPanel').hidden=true;BULK=[];toast('أُضيفت '+list.length+' مهمة إلى اللوحة')})
+      .catch(function(e){b.disabled=false;bCount();toast((e&&e.message)||'تعذّرت الإضافة')});
+  }
+  $('aiBulk').onclick=bulkStep1;
   $('fPrec').onclick=function(){var t=($('fTitle').value+' '+$('fNotes').value).trim();runPrec({text:t})};
 
   // مسودة تحديث لصاحب الطلب
