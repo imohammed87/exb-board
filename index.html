@@ -575,8 +575,8 @@ body.veiled .wrap *{pointer-events:none}
 body.screen .vseg button{font-size:17px;padding:10px 20px}
 @media (max-width:700px){.vseg{grid-column:1/-1;justify-content:center}.vseg button{flex:1}}
 body.kpiview .tools,body.kpiview #board,body.kpiview #archive,body.kpiview #fbar,body.kpiview .form,body.kpiview #aiPanel,body.kpiview .vbar{display:none!important}
-.kpi{position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;margin-top:14px}
-.khead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.kpi{position:relative;z-index:1;display:flex;flex-direction:column;gap:16px;margin-top:16px}
+.khead{padding:12px 16px;border-radius:16px;background:rgba(10,14,34,.7);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .khead h2{margin:0;font-size:24px}.khead p{margin:2px 0 0;color:var(--muted);font-size:14px}
 .kbtns{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 .kseg{display:flex;gap:3px;padding:4px;border-radius:12px;background:var(--glass);border:1px solid var(--glass-line)}
@@ -585,13 +585,13 @@ body.kpiview .tools,body.kpiview #board,body.kpiview #archive,body.kpiview #fbar
 .kbtn{display:flex;align-items:center;gap:7px;padding:9px 14px;border-radius:12px;border:1px solid var(--glass-line);background:var(--glass);color:#fff;font-weight:700}
 .kbtn:hover,.kp button.krow:hover,.ktile:hover,.kst:hover{border-color:rgba(139,124,255,.6)}
 .ktiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
-.ktile{text-align:right;display:flex;flex-direction:column;gap:6px;padding:18px 20px;border-radius:18px;background:var(--glass);border:1px solid var(--glass-line);color:inherit}
+.ktile{text-align:right;display:flex;flex-direction:column;gap:6px;padding:18px 20px;border-radius:18px;background:rgba(10,14,34,.78);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--glass-line);color:inherit}
 .ktile .kl{display:flex;justify-content:space-between;color:var(--soft);font-weight:600;font-size:15px}.ktile .kl i{font-style:normal;font-size:12px;color:var(--muted)}
 .ktile .kv{display:flex;align-items:baseline;gap:8px}.ktile .kv b{font-size:44px;line-height:1.05}.ktile .kv span{color:var(--soft)}
 .ktile .kn{font-size:13.5px;font-weight:600;color:var(--soft)}
 .up{color:#5EEAD4!important}.dn{color:var(--danger)!important}
 .kgrid{display:grid;grid-template-columns:1.45fr 1.15fr .9fr;gap:14px}
-.kp{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-radius:18px;background:var(--glass);border:1px solid var(--glass-line);min-width:0}
+.kp{display:flex;flex-direction:column;gap:8px;padding:16px 18px;border-radius:18px;background:rgba(10,14,34,.78);-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid var(--glass-line);min-width:0}
 .kp h3{margin:0;font-size:17px}.kp .kph{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
 .klg{display:flex;gap:10px;font-size:12px;color:var(--soft)}.klg span{display:flex;align-items:center;gap:5px}.klg i{width:10px;height:10px;border-radius:3px;display:inline-block}
 button.krow{display:grid;grid-template-columns:minmax(96px,150px) 1fr 52px 58px;gap:10px;align-items:center;text-align:right;border:1px solid transparent;background:transparent;color:inherit;padding:4px 6px;border-radius:10px}
@@ -608,7 +608,7 @@ button.krow{display:grid;grid-template-columns:minmax(96px,150px) 1fr 52px 58px;
 .klab{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;font-size:11px;color:var(--muted);text-align:center}
 .kst{display:flex;flex-direction:column;gap:4px;text-align:right;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.05);border:1px solid transparent;border-top:4px solid var(--c);color:inherit}
 .kst span{display:flex;justify-content:space-between;align-items:baseline;font-weight:700}.kst span b{font-size:28px}.kst small{font-weight:600}
-.katt{background:rgba(255,138,128,.07);border-color:rgba(255,138,128,.28)}
+.katt{background:rgba(40,14,24,.8);border-color:rgba(255,138,128,.28)}
 .kattl{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
 .kac{display:flex;flex-direction:column;justify-content:space-between;gap:8px;text-align:right;padding:14px 16px;border-radius:14px;border:0;background:#fff;color:#1B2747;min-height:84px}
 .kac b{font-size:16px}.kac em{font-style:normal}.kac span{display:flex;justify-content:space-between;gap:8px;align-items:center;font-size:13px;color:#5A6580}
@@ -705,23 +705,6 @@ body.dark .gchip{background:#2C2558;color:#CFC4FF}
     </div>
   </header>
   <div class="fbar" id="fbar" hidden><span id="fbarTxt"></span><button type="button" id="fbarClear">✕ إظهار الكل</button></div>
-  <section class="kpi" id="kpi" hidden aria-label="المؤشرات التنفيذية">
-    <div class="khead">
-      <div><h2>المؤشرات التنفيذية</h2><p id="kSub"></p></div>
-      <div class="kbtns">
-        <div class="kseg" role="group" aria-label="الفترة"><button type="button" data-per="week" aria-pressed="false">أسبوع</button><button type="button" data-per="month" aria-pressed="true">شهر</button><button type="button" data-per="quarter" aria-pressed="false">ربع سنة</button></div>
-        <button type="button" class="kbtn" id="kGoalsBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>الأهداف السنوية</button>
-        <button type="button" class="kbtn" id="kExportBtn" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>تصدير تقرير</button>
-      </div>
-    </div>
-    <div class="ktiles" id="kTiles"></div>
-    <div class="kgrid">
-      <section class="kp" id="kCap"></section>
-      <section class="kp" id="kTrend"></section>
-      <section class="kp" id="kStages"></section>
-    </div>
-    <section class="kp katt" id="kAtt"></section>
-  </section>
 
   <div class="tools">
     <div class="fab-row">
@@ -819,6 +802,23 @@ body.dark .gchip{background:#2C2558;color:#CFC4FF}
     </div>
   </form>
 
+  <section class="kpi" id="kpi" hidden aria-label="المؤشرات التنفيذية">
+    <div class="khead">
+      <div><h2>المؤشرات التنفيذية</h2><p id="kSub"></p></div>
+      <div class="kbtns">
+        <div class="kseg" role="group" aria-label="الفترة"><button type="button" data-per="week" aria-pressed="false">أسبوع</button><button type="button" data-per="month" aria-pressed="true">شهر</button><button type="button" data-per="quarter" aria-pressed="false">ربع سنة</button></div>
+        <button type="button" class="kbtn" id="kGoalsBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/></svg>الأهداف السنوية</button>
+        <button type="button" class="kbtn" id="kExportBtn" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>تصدير تقرير</button>
+      </div>
+    </div>
+    <div class="ktiles" id="kTiles"></div>
+    <div class="kgrid">
+      <section class="kp" id="kCap"></section>
+      <section class="kp" id="kTrend"></section>
+      <section class="kp" id="kStages"></section>
+    </div>
+    <section class="kp katt" id="kAtt"></section>
+  </section>
   <div class="board" id="board"><div class="cols" id="cols"></div></div>
 
   <section class="archive" id="archive" hidden>
@@ -1739,7 +1739,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     $('kAtt').innerHTML='<h3>يحتاج انتباه</h3>'+(A.length?'<div class="kattl">'+A.map(function(a){return '<button type="button" class="kac" data-kd="'+esc(a.x.id)+'"><b>'+esc(a.x.title)+'</b><span>'+esc(a.x.assignee||'—')+'<em class="ktag t-late">'+esc(a.why)+'</em></span></button>'}).join('')+'</div>':'<p class="kempty">ما فيه شي يحتاج انتباه الحين.</p>');
     if(document.body.classList.contains('screen')) fitKpi();
   }
-  function fitKpi(){var k=$('kpi');k.style.height='';var h=innerHeight-k.getBoundingClientRect().top-14;if(h>500){k.style.height=h+'px';k.querySelector('.kgrid').style.flex='1';k.querySelector('.kgrid').style.minHeight='0'}}
+  function fitKpi(){var k=$('kpi');k.style.height='';var h=innerHeight-k.getBoundingClientRect().top-14;if(h>500){k.style.height=h+'px';k.style.overflowY='auto';k.querySelector('.kgrid').style.flex='1 0 auto'}}
   window.addEventListener('resize',function(){if(KVIEW==='kpi'&&document.body.classList.contains('screen'))fitKpi()});
 
   // ----- المربع المكبر -----
