@@ -200,6 +200,11 @@ body.screen .topbar{margin:-22px -28px 0;padding:16px 28px 12px}
 .aihint{font-size:12px;color:var(--muted);margin-inline-start:auto}
 #aiGo{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(180deg,#8B5CF6,#5B4BD6);box-shadow:0 8px 24px rgba(139,92,246,.45)}
 #aiGo.busy{opacity:.7;cursor:progress}
+.aiupd{border:1px solid rgba(20,184,166,.45);background:rgba(20,184,166,.08);border-radius:16px;padding:16px 18px}
+.aiupd-h{margin:0 0 10px;font-weight:700;color:#5EEAD4}
+.aiupd-g{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.aiupd textarea{min-height:70px}
+@media (max-width:700px){.aiupd-g{grid-template-columns:1fr}}
 .tri{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:999px;white-space:nowrap}
 .tri.routine{background:#E7F6EC;color:#16723F;border:1px solid #B7E2C6}
 .tri.attention{background:#FDECEC;color:#B42318;border:1px solid #F5C2BE}
@@ -554,11 +559,25 @@ body.vlay:not(.screen) .col.folded .stack{display:none}
   </div>
 
   <section class="form aipanel" id="aiPanel" hidden>
-    <div class="field full"><label for="aiText">الصق نص الطلب كما وصلك (واتساب، إيميل، ملاحظة اجتماع)</label>
-      <textarea id="aiText" placeholder="مثال: محمد صباح الخير، الرئيس التنفيذي يبي عرض مختصر عن نتائج الربع الثالث قبل اجتماع الأحد الجاي، ضروري"></textarea></div>
+    <div class="field full"><label for="aiText">اكتب أو قل بصوتك: طلب جديد، أو تحديث على مهمة موجودة</label>
+      <textarea id="aiText" placeholder="طلب جديد: الرئيس التنفيذي يبي عرض مختصر عن نتائج الربع الثالث قبل الأحد، ضروري&#10;أو تحديث: تقرير الربع الثالث استلمنا الأرقام وبدأنا الملخص، والموعد تأجل للاثنين"></textarea></div>
     <p class="msg full" id="aiMsg" hidden></p>
+    <div class="full aiupd" id="aiUpd" hidden>
+      <p class="aiupd-h">تحديث على مهمة موجودة: راجعه قبل الحفظ</p>
+      <div class="aiupd-g">
+        <div class="field full"><label for="uTask">المهمة</label><select id="uTask"></select></div>
+        <div class="field full"><label for="uText">التحديث</label><textarea id="uText" maxlength="600"></textarea></div>
+        <div class="field"><label for="uStage">نقل إلى</label><select id="uStage"><option value="">بدون تغيير</option></select></div>
+        <div class="field"><label for="uDue">موعد جديد</label><input id="uDue" type="date"></div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button type="button" class="primary" id="uOk">تأكيد التحديث</button>
+        <button type="button" class="ghost" id="uAsNew">لا، أضفها مهمة جديدة</button>
+        <button type="button" class="ghost" id="uCancel">إلغاء</button>
+      </div>
+    </div>
     <div class="full" style="display:flex;gap:8px;align-items:center">
-      <button type="button" class="primary" id="aiGo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.6L18 9.5l-4.2 1.9L12 16l-1.8-4.6L6 9.5l4.2-1.9z"></path><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"></path></svg> حلّل الطلب</button>
+      <button type="button" class="primary" id="aiGo"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l1.8 4.6L18 9.5l-4.2 1.9L12 16l-1.8-4.6L6 9.5l4.2-1.9z"></path><path d="M19 15l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8z"></path></svg> حلّل</button>
       <button type="button" class="ghost" id="aiMic" aria-pressed="false" title="سجّل الطلب بصوتك"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"></rect><path d="M5 11a7 7 0 0 0 14 0M12 18v3"></path></svg><span>سجّل بصوتك</span></button>
       <button type="button" class="ghost" id="aiCancel">إلغاء</button>
       <span class="aihint">بيانات الطلب تُرسل لخدمة Claude API لتحليلها. راجع البطاقة قبل الحفظ.</span>
@@ -1036,8 +1055,15 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     if(rec)try{rec.stop()}catch(e){}
     var txt=$('aiText').value.trim();if(!txt){$('aiText').focus();return}
     var btn=$('aiGo');btn.disabled=true;btn.classList.add('busy');$('aiMsg').hidden=true;
-    call('aiParse',KEY,txt).then(function(d){
+    LASTCMD=txt;$('aiUpd').hidden=true;
+    call('aiCommand',KEY,txt).then(function(r){
       btn.disabled=false;btn.classList.remove('busy');
+      if(r.action==='update') return showUpd(r);
+      fillAdd(r.task);
+    }).catch(function(e){btn.disabled=false;btn.classList.remove('busy');$('aiMsg').textContent=(e&&e.message)||'تعذّر التحليل';$('aiMsg').hidden=false});
+  };
+  var LASTCMD='',UPD=null;
+  function fillAdd(d){
       $('form').reset();$('form').hidden=false;$('formMsg').hidden=true;
       $('fTitle').value=d.title||'';$('fReq').value=d.requester||'';$('fAs').value=d.assignee||'';
       $('fRecv').value=today;$('fDue').value=d.due||'';$('fSrc').value=d.source||'بريد';
@@ -1046,7 +1072,37 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
       $('aiPanel').hidden=true;$('aiText').value='';
       $('formMsg').textContent='عبّى الوكيل البطاقة، راجعها وعدّل اللي تبي ثم اضغط إضافة.'+(TRI?(TRI.triage==='attention'?' 🔴 يحتاج قرارك: ':' 🟢 روتيني: ')+TRI.triageReason:'');$('formMsg').classList.add('ok');$('formMsg').hidden=false;
       $('fTitle').focus();
-    }).catch(function(e){btn.disabled=false;btn.classList.remove('busy');$('aiMsg').textContent=(e&&e.message)||'تعذّر التحليل';$('aiMsg').hidden=false});
+  }
+  function showUpd(r){
+    UPD=r;
+    var opts=tasks.filter(function(t){return !t.archived}).map(function(t){return '<option value="'+esc(t.id)+'"'+(t.id===r.id?' selected':'')+'>'+esc(t.title)+'</option>'}).join('');
+    $('uTask').innerHTML=opts;$('uText').value=r.update||'';
+    $('uStage').innerHTML='<option value="">بدون تغيير</option>'+COLS.filter(function(c){return c.id!=='backlog'}).map(function(c){return '<option value="'+c.id+'"'+(c.id===r.stage?' selected':'')+'>'+c.name+'</option>'}).join('');
+    $('uDue').value=r.due||'';
+    $('aiUpd').hidden=false;$('aiGo').parentNode.hidden=true;$('aiMsg').hidden=true;$('uText').focus();
+  }
+  function closeUpd(){$('aiUpd').hidden=true;$('aiGo').parentNode.hidden=false;UPD=null}
+  $('uCancel').onclick=closeUpd;
+  $('uAsNew').onclick=function(){
+    var b=this;b.disabled=true;
+    call('aiParse',KEY,LASTCMD).then(function(d){b.disabled=false;closeUpd();fillAdd(d)}).catch(function(e){b.disabled=false;toast((e&&e.message)||'تعذّر التحليل')});
+  };
+  $('uOk').onclick=function(){
+    var id=$('uTask').value,x=find(id),tx=$('uText').value.trim(),st=$('uStage').value,du=$('uDue').value;
+    if(!x){toast('اختر المهمة');return}
+    if(!tx&&!st&&!du){$('uText').focus();toast('اكتب التحديث');return}
+    if(st===x.stage) st='';if(du===(x.due||'')) du='';
+    var reason=(UPD&&UPD.id===id&&UPD.dueReason)||'تحديث صوتي';
+    // تطبيق محلي سريع ثم الحفظ بالتتابع
+    if(tx) x.updates=(x.updates||[]).concat([{on:new Date().toISOString(),text:tx}]);
+    if(st) x.stage=st;
+    if(du){if(x.due) x.dueLog=(x.dueLog||[]).concat([{from:x.due,to:du,on:today,reason:reason}]);x.due=du}
+    render();closeUpd();$('aiPanel').hidden=true;$('aiText').value='';
+    toast('تم تحديث «'+x.title+'»');
+    var pr=tx?call('addUpdate',KEY,id,tx):Promise.resolve(null);
+    if(st) pr=pr.then(function(){return call('updateTask',KEY,id,{stage:st})});
+    if(du) pr=pr.then(function(){return call('updateTask',KEY,id,{due:du,dueReason:reason})});
+    mutate(pr);
   };
   $('form').onsubmit=function(e){
     e.preventDefault();
