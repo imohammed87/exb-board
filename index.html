@@ -257,7 +257,7 @@ button.stat{font:inherit;color:inherit;cursor:pointer;text-align:start}
 button.stat:hover{border-color:rgba(139,124,255,.55)}
 button.stat[aria-pressed="true"]{border-color:#8B7CFF;box-shadow:0 0 0 2px rgba(139,124,255,.35)}
 button.stat.late[aria-pressed="true"]{border-color:#FF8A80;box-shadow:0 0 0 2px rgba(255,138,128,.3)}
-body.screen button.stat{cursor:default;pointer-events:none}
+body.screen button.stat{cursor:pointer}
 
 /* تفاصيل المهمة على شاشة العرض */
 body.screen .card[data-id]{cursor:pointer;-webkit-tap-highlight-color:transparent}
@@ -504,6 +504,23 @@ body.vlay:not(.screen) .col.folded .stack{display:none}
 body.dark .drop{background:#1F2547;border-color:#4C3F8F}
 body.dark .btools .grp{background:#2A2350}
 body.dark .btbl th{background:#232B4F;color:#DCE3F5}
+
+/* ===== فلترة بالأرقام والأشخاص (الشاشتين) ===== */
+button.stat[aria-pressed="true"]{border-color:#A78BFA;background:rgba(124,92,235,.32);box-shadow:0 0 0 2px rgba(167,139,250,.35)}
+button.stat.late[aria-pressed="true"]{border-color:#FF8A80;background:rgba(220,59,48,.28);box-shadow:0 0 0 2px rgba(255,138,128,.35)}
+.stat.who{position:relative;cursor:pointer}
+.stat.who select{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:inherit;font:inherit;font-weight:600;font-size:14px;padding:0 4px 0 18px;cursor:pointer;max-width:200px;outline:none}
+.stat.who select option{color:#16262A}
+.stat.who::after{content:"▾";position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:11px;opacity:.7;pointer-events:none}
+.stat.who.on{border-color:#5EEAD4;background:rgba(20,184,166,.22);box-shadow:0 0 0 2px rgba(94,234,212,.3)}
+body.screen .stat.who select{font-size:22px;max-width:320px}
+.fbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:10px 0 0;padding:10px 16px;border-radius:14px;background:rgba(124,92,235,.18);border:1px solid rgba(167,139,250,.45);color:#EEF0FA;font-size:15px;font-weight:600}
+.fbar[hidden]{display:none!important}
+.fbar button{font:inherit;font-size:14px;font-weight:700;padding:8px 14px;border-radius:10px;border:1px solid rgba(255,255,255,.3);background:rgba(255,255,255,.1);color:#fff;cursor:pointer;white-space:nowrap}
+body.screen .fbar{font-size:22px;padding:14px 20px}
+body.screen .fbar button{font-size:20px;padding:10px 18px}
+@media (max-width:700px){.stats .stat.who{grid-column:1/-1;justify-content:flex-start}.stat.who select{max-width:none;flex:1}}
+.aimsg-big{font-size:15px!important;font-weight:700;color:#0B6B60!important;background:#DDF4F0!important;border:1px solid #9FDCD2;border-radius:12px;padding:12px 14px!important}
 </style>
 </head>
 <body>
@@ -531,11 +548,13 @@ body.dark .btbl th{background:#232B4F;color:#DCE3F5}
       </div>
     </div>
     <div class="stats">
-      <div class="stat"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="M8 10h8M8 14h5"></path></svg></i><b id="sOpen">0</b><span>مفتوح</span></div>
+      <button type="button" class="stat sbtn" id="sOpenBtn" aria-pressed="false" title="اعرض كل المفتوح"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="M8 10h8M8 14h5"></path></svg></i><b id="sOpen">0</b><span>مفتوح</span></button>
       <button type="button" class="stat sbtn" id="sTodayBtn" aria-pressed="false" title="اعرض المستحق اليوم فقط"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></i><b id="sToday">0</b><span>مستحق اليوم</span></button>
       <button type="button" class="stat late sbtn" id="sLateBtn" aria-pressed="false" title="اعرض المتأخر فقط"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5M12 16.5v.5"></path><path d="M10.3 3.9 2.6 17.4A2 2 0 0 0 4.3 20.4h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></i><b id="sLate">0</b><span>متأخر</span></button>
+      <label class="stat who" title="اعرض مهام شخص"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"></path></svg></i><select id="who" aria-label="مهام شخص"><option value="">كل الأشخاص</option></select></label>
     </div>
   </header>
+  <div class="fbar" id="fbar" hidden><span id="fbarTxt"></span><button type="button" id="fbarClear">✕ إظهار الكل</button></div>
 
   <div class="tools">
     <div class="fab-row">
@@ -835,7 +854,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   },50);
   var EXPANDED={}; // البطاقات المفتوحة (تبقى مفتوحة بعد التحديث)
   function render(){
-    var q=$('q').value.trim(),fp=$('fp').value,screen=document.body.classList.contains('screen');
+    var q=normQ($('q').value),fp=$('fp').value,screen=document.body.classList.contains('screen'),who=$('who').value;
     var active=tasks.filter(function(x){return !x.archived});
     $('archN').textContent=tasks.length-active.length;
     if(showArchive&&!screen) renderArchive(q,fp);
@@ -849,9 +868,16 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
       if(fd==='today') return n===0;
       return n>=0&&n<=Number(fd);
     };
-    $('clearF').hidden=!(fp||fd||q);
+    $('clearF').hidden=!(fp||fd||q||who);
     [['sLateBtn','late'],['sTodayBtn','today']].forEach(function(b){var el=$(b[0]);if(el)el.setAttribute('aria-pressed',fd===b[1])});
-    var vis=active.filter(function(x){return (!fp||x.priority===fp)&&dueOk(x)&&(!q||[x.title,x.requester,x.assignee,x.notes].join(' ').indexOf(q)>-1)});
+    $('sOpenBtn').setAttribute('aria-pressed',!fd&&!fp&&!q&&!who?'false':'false');
+    fillWho(active,screen);
+    var whoN=norm(who);
+    var vis=active.filter(function(x){return (!fp||x.priority===fp)&&dueOk(x)&&(!who||norm(x.assignee).indexOf(whoN)>-1||norm(x.requester).indexOf(whoN)>-1)&&(!q||norm([x.title,x.requester,x.assignee,x.notes].join(' ')).indexOf(q)>-1)});
+    // شريط يوضح الفلتر الحالي مع زر «إظهار الكل» (يظهر في الشاشتين)
+    var parts=[];if(fd)parts.push($('fd').options[$('fd').selectedIndex].text);if(fp)parts.push($('fp').options[$('fp').selectedIndex].text);if(who)parts.push('مهام '+who);if(q)parts.push('بحث: '+$('q').value.trim());
+    $('fbar').hidden=!parts.length;$('fbarTxt').textContent=parts.length?'تعرض: '+parts.join(' · ')+' ('+vis.filter(function(x){return !(screen&&x.stage==='backlog')}).length+')':'';
+    $('who').parentNode.classList.toggle('on',!!who);
     var cols=COLS.filter(function(c){return !(screen&&c.id==='backlog')});
     var html='';
     cols.forEach(function(c){
@@ -859,6 +885,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
       var list=vis.filter(function(x){return x.stage===c.id}).sort(function(a,b){
         return (pri(a.priority)[3]-pri(b.priority)[3])||(a.received<b.received?1:a.received>b.received?-1:0)||(a.created<b.created?1:-1);
       });
+      if((fd||fp||q||who)&&!list.length&&vis.some(function(x){return cols.some(function(cc){return cc.id===x.stage})})) return; // مع الفلترة: نخفي الأعمدة الفاضية
       var dense=screen&&list.length>DENSE_AT;
       var untri=c.id==='backlog'&&canEdit&&!screen?list.filter(function(x){return !x.triage}).length:0;
       html+='<section class="col '+c.id+(dense?' dense':'')+'" data-stage="'+c.id+'"><div class="col-head"><div><h2>'+c.name+'</h2><span class="en" lang="en">'+c.en+'</span></div><span class="hr">'+(untri?'<button type="button" class="tri-btn" data-act="triage" title="يفرز الوكيل الطلبات غير المفروزة: روتيني أو يحتاج قرارك"'+(triaging?' disabled':'')+'>'+(triaging?'جارٍ الفرز…':'✨ فرز ('+untri+')')+'</button>':'')+'<span class="n">'+list.length+'</span></span></div>';
@@ -1065,9 +1092,32 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   $('sBox').addEventListener('keydown',function(e){if(e.key==='Escape'){$('q').value='';render();closeSearch(true);$('sBtn').focus()}});
   $('q').addEventListener('input',function(){$('sBox').classList.toggle('has-q',!!$('q').value.trim())});
   $('q').oninput=render;$('fp').onchange=render;$('fd').onchange=render;
-  $('sTodayBtn').onclick=function(){statFilter('today')};$('sLateBtn').onclick=function(){statFilter('late')};
-  $('clearF').onclick=function(){closeSearch(true);$('q').value='';$('fp').value='';$('fd').value='';render()};
-  function statFilter(v){if(document.body.classList.contains('screen'))return;$('fd').value=($('fd').value===v?'':v);render()}
+  $('sTodayBtn').onclick=function(){statFilter('today')};$('sLateBtn').onclick=function(){statFilter('late')};$('sOpenBtn').onclick=function(){statFilter('open')};
+  $('who').onchange=function(){touched();render()};
+  $('fbarClear').onclick=function(){statFilter('open')};
+  $('clearF').onclick=function(){closeSearch(true);$('q').value='';$('fp').value='';$('fd').value='';$('who').value='';render()};
+  function statFilter(v){
+    if(v==='open'){$('fd').value='';$('who').value='';$('fp').value='';$('q').value='';closeSearch(true)}
+    else $('fd').value=($('fd').value===v?'':v);
+    touched();render();
+  }
+  // مطابقة عربية مرنة: أ/إ/آ=ا، ة=ه، ى=ي، بدون تشكيل، وتجاهل «مهام/حق/تبع»
+  function norm(t){return String(t||'').replace(/[\u064B-\u0652\u0640]/g,'').replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/ى/g,'ي').replace(/\s+/g,' ').trim().toLowerCase()}
+  function normQ(t){return norm(t).replace(/^(مهام|مهمات|تاسكات|حق|تبع|حقت)\s+/,'').replace(/^ال(?=مهام)/,'')}
+  function fillWho(active,screen){
+    var sel=$('who'),cur=sel.value,seen={},names=[];
+    active.forEach(function(x){if(screen&&x.stage==='backlog')return;[x.assignee,x.requester].forEach(function(n){n=String(n||'').trim();if(n&&!seen[norm(n)]){seen[norm(n)]=1;names.push(n)}})});
+    names.sort(function(a,b){return a.localeCompare(b,'ar')});
+    var html='<option value="">كل الأشخاص</option>'+names.map(function(n){return '<option'+(n===cur?' selected':'')+'>'+esc(n)+'</option>'}).join('');
+    if(sel.dataset.h!==html){sel.innerHTML=html;sel.dataset.h=html;if(cur&&names.indexOf(cur)<0)sel.value=''}
+  }
+  // شاشة المدير: ترجع لعرض الكل بعد 4 دقائق بدون لمس
+  var lastTouch=Date.now();function touched(){lastTouch=Date.now()}
+  document.addEventListener('pointerdown',touched,true);
+  setInterval(function(){
+    if(!document.body.classList.contains('screen')||Date.now()-lastTouch<240000) return;
+    if($('fd').value||$('who').value||$('q').value||$('fp').value){$('fd').value='';$('who').value='';$('fp').value='';$('q').value='';render()}
+  },30000);
   $('archBtn').onclick=function(){
     showArchive=!showArchive;this.setAttribute('aria-pressed',showArchive);
     $('archLabel').textContent=showArchive?'رجوع للوحة':'الأرشيف';
@@ -1082,8 +1132,12 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     if(rec)try{rec.stop()}catch(e){}
     var txt=$('aiText').value.trim();if(!txt){$('aiText').focus();return}
     var btn=$('aiGo');btn.disabled=true;btn.classList.add('busy');$('aiMsg').hidden=true;
-    LASTCMD=txt;$('aiUpd').hidden=true;
-    call('aiCommand',KEY,txt).then(function(r){
+    LASTCMD=txt;$('aiUpd').hidden=true;$('aiMsg').classList.remove('aimsg-big');
+    call('aiCommand',KEY,txt).catch(function(e){
+      // السيرفر القديم ما فيه aiCommand: نرجع للإضافة العادية
+      if(/aiCommand|غير معروف|not found/i.test((e&&e.message)||'')) return call('aiParse',KEY,txt).then(function(d){return {action:'add',task:d}});
+      throw e;
+    }).then(function(r){
       btn.disabled=false;btn.classList.remove('busy');
       if(r.action==='update') return showUpd(r);
       fillAdd(r.task);
@@ -1231,7 +1285,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   var savedLay=null;try{savedLay=localStorage.getItem('exbLayout')}catch(e){}
   setLayout(savedLay==='v');
   $('themeBtn').onclick=function(){setTheme(!document.body.classList.contains('dark'))};
-  $('micTop').onclick=function(){$('aiBtn').click();$('aiMic').click()};
+  $('micTop').onclick=function(){$('aiBtn').click();$('aiText').focus();$('aiMic').click()};
 
   /* ===== دفعة مهام ===== */
   var BULK=[],BQ='';
@@ -1377,7 +1431,7 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   function kbdDictate(){
     $('aiText').focus();
     $('aiMsg').textContent=IOS?'اضغط زر المايك 🎤 في الكيبورد وتكلم، وبعدها «حلّل الطلب». هذي الطريقة تتبع وضع جوالك (صامت أو عام).':'استخدم الإملاء من الكيبورد: في ويندوز اضغط Win+H، وفي الجوال زر المايك في الكيبورد.';
-    $('aiMsg').hidden=false;
+    $('aiMsg').hidden=false;$('aiMsg').classList.add('aimsg-big');
   }
   $('aiMic').onclick=function(){
     if(!rec&&micMode()==='kbd') return kbdDictate();
