@@ -105,7 +105,8 @@ h1{margin:0;font-size:34px;font-weight:700;letter-spacing:-.2px;line-height:1.2}
 .col-head .en{font-size:12px;color:var(--muted);direction:ltr;display:block;text-align:right}
 .col-head .n{min-width:34px;height:34px;padding:0 8px;border-radius:11px;background:var(--glass-2);font-size:17px;font-weight:700;display:inline-flex;align-items:center;justify-content:center}
 .stack{display:flex;flex-direction:column;gap:10px}
-body.screen .stack{overflow:hidden;gap:7px}
+body.screen .stack{overflow-y:auto;overflow-x:hidden;gap:7px;scrollbar-width:none;overscroll-behavior:contain;scroll-behavior:smooth}
+body.screen .stack::-webkit-scrollbar{display:none}
 .empty{margin:0;padding:26px 8px;text-align:center;color:var(--muted);font-size:14px}
 
 .card{color-scheme:light;position:relative;background:var(--card);color:var(--card-ink);border-radius:16px;padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px;box-shadow:0 10px 24px rgba(6,12,32,.28);overflow:hidden}
@@ -521,6 +522,15 @@ body.screen .fbar{font-size:22px;padding:14px 20px}
 body.screen .fbar button{font-size:20px;padding:10px 18px}
 @media (max-width:700px){.stats .stat.who{grid-column:1/-1;justify-content:flex-start}.stat.who select{max-width:none;flex:1}}
 .aimsg-big{font-size:15px!important;font-weight:700;color:#0B6B60!important;background:#DDF4F0!important;border:1px solid #9FDCD2;border-radius:12px;padding:12px 14px!important}
+
+/* أسهم التنقل في أعمدة شاشة المدير */
+body.screen .col{position:relative}
+body.screen .wrap{padding-bottom:12px!important}
+body.screen{overflow:hidden}
+.sarrows{display:flex;gap:10px;justify-content:center;padding:10px 0 4px}
+.sar{width:64px;height:44px;border-radius:14px;border:1px solid rgba(167,139,250,.5);background:rgba(124,92,235,.25);color:#fff;font-size:20px;cursor:pointer;touch-action:manipulation}
+.sar:active{transform:scale(.95)}
+.sar:disabled{opacity:.3;cursor:default}
 </style>
 </head>
 <body>
@@ -828,10 +838,10 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
     [].forEach.call(document.querySelectorAll('.col'),function(col){
       var head=col.querySelector('.col-head'),st=col.querySelector('.stack');
       var hh=Math.max(140,h-head.offsetHeight-28)+'px';
-      if(screen){st.style.height='';st.style.maxHeight=hh}else{st.style.maxHeight='';st.style.height=hh}
-      if(screen){st.scrollTop=0;st.dataset.dir='1';st.dataset.wait='60'}
-      else if(keep&&keep[col.dataset.stage]) st.scrollTop=keep[col.dataset.stage];
+      if(screen){st.style.height='';st.style.maxHeight=hh;if(st.scrollHeight-st.clientHeight>4)st.style.maxHeight=(parseFloat(hh)-62)+'px'}else{st.style.maxHeight='';st.style.height=hh}
+      if(keep&&keep[col.dataset.stage]) st.scrollTop=keep[col.dataset.stage];
     });
+    if(screen) setTimeout(screenArrows,30);
     if(!screen&&$('form').hidden&&$('aiPanel').hidden&&!$('board').hidden){
       var extra=document.documentElement.scrollHeight-window.innerHeight;
       if(extra>0)[].forEach.call(document.querySelectorAll('.stack'),function(st){st.style.height=Math.max(140,parseFloat(st.style.height)-extra)+'px'});
@@ -842,8 +852,28 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   function saveScroll(){var m={};[].forEach.call(document.querySelectorAll('.col'),function(c){var st=c.querySelector('.stack');if(st)m[c.dataset.stage]=st.scrollTop});return m}
   // تمرير تلقائي بطيء للأعمدة الطويلة على شاشة العرض
   var reduce=window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // شاشة المدير: المهام ثابتة (بدون تمرير تلقائي)، والتنقل بالأسهم أو بالسحب
+  function screenArrows(){
+    [].forEach.call(document.querySelectorAll('body.screen .col'),function(col){
+      var st=col.querySelector('.stack');if(!st) return;
+      var box=col.querySelector('.sarrows');
+      var need=st.scrollHeight-st.clientHeight>4;
+      if(!need){if(box)box.remove();return}
+      if(!box){
+        box=document.createElement('div');box.className='sarrows';
+        box.innerHTML='<button type="button" class="sar up" aria-label="المهام السابقة">▲</button><button type="button" class="sar dn" aria-label="المهام التالية">▼</button>';
+        col.appendChild(box);
+        box.querySelector('.up').onclick=function(){st.scrollBy({top:-Math.round(st.clientHeight*0.8),behavior:'smooth'})};
+        box.querySelector('.dn').onclick=function(){st.scrollBy({top:Math.round(st.clientHeight*0.8),behavior:'smooth'})};
+        st.addEventListener('scroll',function(){paintArrows(st,box)},{passive:true});
+      }
+      paintArrows(st,box);
+    });
+  }
+  function paintArrows(st,box){var max=st.scrollHeight-st.clientHeight;box.querySelector('.up').disabled=st.scrollTop<=2;box.querySelector('.dn').disabled=st.scrollTop>=max-2}
+  var AUTO_SCROLL=false;
   setInterval(function(){
-    if(reduce||!document.body.classList.contains('screen')||!$('detail').hidden) return;
+    if(!AUTO_SCROLL||reduce||!document.body.classList.contains('screen')||!$('detail').hidden) return;
     [].forEach.call(document.querySelectorAll('.stack'),function(st){
       var max=st.scrollHeight-st.clientHeight;if(max<=2) return;
       var w=+st.dataset.wait||0;if(w>0){st.dataset.wait=w-1;return}
