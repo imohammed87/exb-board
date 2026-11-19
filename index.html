@@ -543,13 +543,22 @@ body.screen{overflow:hidden}
 body.screen .stack.hasbar,body.screen .col.hasbar .pin{padding-right:30px}
 
 /* ===== وضع الخصوصية: ضبابية على شاشة المدير ===== */
-.priv{display:none!important}
-body.screen .priv{display:flex!important}
-.veil{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:rgba(8,10,24,.55);-webkit-backdrop-filter:blur(34px) saturate(.6);backdrop-filter:blur(34px) saturate(.6)}
+header{position:relative}
+.privbtn{position:absolute;top:0;left:0;z-index:3;display:flex;align-items:center;gap:8px;height:40px;padding:0 14px;border-radius:12px;border:1px solid var(--glass-line);background:var(--glass);color:#E9E3FF;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;backdrop-filter:blur(8px)}
+.privbtn:hover{border-color:rgba(139,124,255,.6)}
+.privbtn[aria-pressed="true"]{background:linear-gradient(135deg,#B42318,#7A1414);border-color:transparent;color:#fff;box-shadow:0 6px 18px rgba(180,35,24,.4)}
+body.screen .privbtn{height:48px;padding:0 18px;font-size:17px;border-radius:14px}
+@media (min-width:701px){.privbtn{position:static;order:99;align-self:flex-end;height:auto;min-height:52px}.stats{margin-inline-start:auto}body.screen .privbtn{min-height:58px}}
+@media (max-width:700px){.privbtn{height:34px;padding:0 10px;font-size:12px;top:4px}.privbtn .pl{display:none}}
+/* وضع الإخفاء: تبقى الخلفية وتختفي المحتويات (بدون ضبابية) */
+body.veiled .topbar>*,body.veiled .board,body.veiled .archive,body.veiled .vbar,body.veiled .detail:not(.veil),body.veiled .toast{visibility:hidden!important}
+body.veiled .wrap *{pointer-events:none}
+.veil{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:transparent}
 .veil[hidden]{display:none!important}
-.vbox{display:flex;flex-direction:column;align-items:center;gap:18px;color:#E9E5FF;text-align:center}
-.vbox svg{opacity:.85}
-.vbox p{margin:0;font-size:30px;font-weight:700}
+.vbox{display:flex;flex-direction:column;align-items:center;gap:14px;color:#E9E5FF;text-align:center;opacity:.55;transition:opacity .2s}
+.vbox:hover,.vbox:focus-within{opacity:1}
+.vbox svg{opacity:.85;width:44px;height:44px}
+.vbox p{margin:0;font-size:20px;font-weight:700}
 .vbox button{font:inherit;font-size:20px;font-weight:700;padding:14px 40px;border-radius:16px;border:1px solid rgba(167,139,250,.6);background:rgba(124,92,235,.35);color:#fff;cursor:pointer}
 @media (prefers-reduced-motion:no-preference){.veil:not([hidden]){animation:veilIn .25s ease-out}}
 @keyframes veilIn{from{opacity:0}to{opacity:1}}
@@ -572,6 +581,7 @@ body.screen .priv{display:flex!important}
 <div class="wrap">
   <div class="topbar">
   <header>
+    <button type="button" class="privbtn" id="privBtn" aria-pressed="false" title="إخفاء الشاشة"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.9 8.4 2 12 2 12s4 7 10 7c1.7 0 3.2-.5 4.6-1.2"></path></svg><span id="privTxt">إخفاء</span></button>
     <div class="brandrow">
       <div class="brand"><img alt="ExB" src="icon-192.png"></div>
       <div>
@@ -583,7 +593,6 @@ body.screen .priv{display:flex!important}
       <button type="button" class="stat sbtn" id="sOpenBtn" aria-pressed="false" title="اعرض كل المفتوح"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"></rect><path d="M8 10h8M8 14h5"></path></svg></i><b id="sOpen">0</b><span>مفتوح</span></button>
       <button type="button" class="stat sbtn" id="sTodayBtn" aria-pressed="false" title="اعرض المستحق اليوم فقط"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M12 7v5l3 2"></path></svg></i><b id="sToday">0</b><span>مستحق اليوم</span></button>
       <button type="button" class="stat late sbtn" id="sLateBtn" aria-pressed="false" title="اعرض المتأخر فقط"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 8v5M12 16.5v.5"></path><path d="M10.3 3.9 2.6 17.4A2 2 0 0 0 4.3 20.4h15.4a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"></path></svg></i><b id="sLate">0</b><span>متأخر</span></button>
-      <button type="button" class="stat sbtn priv" id="privBtn" title="إخفاء الشاشة فورًا"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8M9.9 5.1A10.4 10.4 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-3.2 4M6.6 6.6C3.9 8.4 2 12 2 12s4 7 10 7c1.7 0 3.2-.5 4.6-1.2"></path></svg></i><span>إخفاء</span></button>
       <label class="stat who" title="اعرض مهام شخص"><i><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"></path></svg></i><select id="who" aria-label="مهام شخص"><option value="">كل الأشخاص</option></select></label>
     </div>
   </header>
@@ -598,7 +607,6 @@ body.screen .priv{display:flex!important}
       <div class="setmenu" id="setMenu" hidden role="menu">
         <div class="sethead">الإعدادات</div>
         <button type="button" class="setrow" id="themeBtn" role="menuitemcheckbox" aria-checked="false"><span>🌙 الوضع الداكن</span><i class="sw"></i></button>
-        <button type="button" class="setrow" id="privRemote" role="menuitemcheckbox" aria-checked="false"><span>🛡️ إخفاء شاشة المدير</span><i class="sw"></i></button>
         <div class="setrow static"><span>🎤 التسجيل الصوتي</span><span class="seg2" role="group" aria-label="طريقة التسجيل الصوتي"><button type="button" data-mic="kbd" aria-pressed="false">الكيبورد</button><button type="button" data-mic="app" aria-pressed="false">التطبيق</button></span></div>
         <div class="setrow static"><span>🧭 عرض المراحل</span><span class="seg2" role="group" aria-label="عرض المراحل"><button type="button" data-lay="h" aria-pressed="true">أفقي</button><button type="button" data-lay="v" aria-pressed="false">عمودي</button></span></div>
         <button type="button" class="setrow" id="exbOut" role="menuitem"><span>🔗 تبديل رابط اللوحة</span></button>
@@ -852,16 +860,18 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   function updateVeil(){
     var scr=document.body.classList.contains('screen');
     var on=scr&&(VEIL_LOCAL||(PRIV&&PRIV!==veilSeen()));
-    $('veil').hidden=!on;
-    var r=$('privRemote');if(r)r.setAttribute('aria-checked',!!PRIV);
+    $('veil').hidden=!on;document.body.classList.toggle('veiled',on);
+    var b=$('privBtn');
+    if(scr){b.setAttribute('aria-pressed','false');$('privTxt').textContent='إخفاء';b.title='إخفاء الشاشة فورًا'}
+    else{b.setAttribute('aria-pressed',!!PRIV);$('privTxt').innerHTML=PRIV?'شاشة المدير مخفية':'إخفاء <span class="pl">شاشة المدير</span>';b.title=PRIV?'اضغط لإظهار شاشة المدير':'إخفاء شاشة المدير عن بُعد'}
   }
-  $('privBtn').onclick=function(){VEIL_LOCAL=true;updateVeil()};
-  $('veilShow').onclick=function(){VEIL_LOCAL=false;if(PRIV){try{localStorage.setItem('exbVeilSeen',PRIV)}catch(e){}}updateVeil()};
-  $('privRemote').onclick=function(e){
+  $('privBtn').onclick=function(e){
+    if(document.body.classList.contains('screen')){VEIL_LOCAL=true;updateVeil();return}
     e.stopPropagation();var on=!PRIV;
     PRIV=on?'pending':'';updateVeil();
-    call('setPrivacy',KEY,on).then(function(d){apply(d);toast(on?'شاشة المدير بتتغطى خلال ثوانٍ':'رجعت شاشة المدير تعرض المهام')}).catch(function(err){PRIV=on?'':'x';updateVeil();fail(err)});
+    call('setPrivacy',KEY,on).then(function(d){apply(d);toast(on?'شاشة المدير بتختفي محتوياتها خلال ثوانٍ':'رجعت شاشة المدير تعرض المهام')}).catch(function(err){PRIV=on?'':'x';updateVeil();fail(err)});
   };
+  $('veilShow').onclick=function(){VEIL_LOCAL=false;if(PRIV){try{localStorage.setItem('exbVeilSeen',PRIV)}catch(e){}}updateVeil()};
   function poll(){
     if(busy||document.hidden) return;
     var scr=document.body.classList.contains('screen');
