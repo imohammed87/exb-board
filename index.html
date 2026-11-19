@@ -515,6 +515,7 @@ body.vlay:not(.screen) .col.folded .stack{display:none}
       <div class="setmenu" id="setMenu" hidden role="menu">
         <div class="sethead">الإعدادات</div>
         <button type="button" class="setrow" id="themeBtn" role="menuitemcheckbox" aria-checked="false"><span>🌙 الوضع الداكن</span><i class="sw"></i></button>
+        <div class="setrow static"><span>🎤 التسجيل الصوتي</span><span class="seg2" role="group" aria-label="طريقة التسجيل الصوتي"><button type="button" data-mic="kbd" aria-pressed="false">الكيبورد</button><button type="button" data-mic="app" aria-pressed="false">التطبيق</button></span></div>
         <div class="setrow static"><span>🧭 عرض المراحل</span><span class="seg2" role="group" aria-label="عرض المراحل"><button type="button" data-lay="h" aria-pressed="true">أفقي</button><button type="button" data-lay="v" aria-pressed="false">عمودي</button></span></div>
         <button type="button" class="setrow" id="exbOut" role="menuitem"><span>🔗 تبديل رابط اللوحة</span></button>
       </div></div>
@@ -1189,7 +1190,20 @@ function exbReset(msg){try{localStorage.removeItem('exb')}catch(e){}location.has
   var SR=window.SpeechRecognition||window.webkitSpeechRecognition,rec=null,recBase='';
   function micHelp(){$('aiMsg').textContent='المتصفح ما سمح بالمايك داخل صفحة Google. استخدم الإملاء بدلها: في ويندوز اضغط Win+H، وفي الجوال اضغط زر المايك في الكيبورد.';$('aiMsg').hidden=false}
   function micUi(on){$('aiMic').classList.toggle('rec',on);$('aiMic').setAttribute('aria-pressed',on);$('aiMic').querySelector('span').textContent=on?'إيقاف التسجيل':'سجّل بصوتك'}
+  // على الآيفون: مايك التطبيق يطلق صوت نظام عند الإيقاف حتى في الوضع الصامت،
+  // فالافتراضي هناك إملاء الكيبورد (يتبع وضع الجوال صامت/عام)
+  var IOS=/iPhone|iPad|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  function micMode(){var m=null;try{m=localStorage.getItem('exbMic')}catch(e){}return m||(IOS||!SR?'kbd':'app')}
+  function paintMic(){var m=micMode();[].forEach.call(document.querySelectorAll('[data-mic]'),function(b){b.setAttribute('aria-pressed',b.dataset.mic===m)})}
+  [].forEach.call(document.querySelectorAll('[data-mic]'),function(b){b.onclick=function(e){e.stopPropagation();try{localStorage.setItem('exbMic',b.dataset.mic)}catch(err){}paintMic()}});
+  paintMic();
+  function kbdDictate(){
+    $('aiText').focus();
+    $('aiMsg').textContent=IOS?'اضغط زر المايك 🎤 في الكيبورد وتكلم، وبعدها «حلّل الطلب». هذي الطريقة تتبع وضع جوالك (صامت أو عام).':'استخدم الإملاء من الكيبورد: في ويندوز اضغط Win+H، وفي الجوال زر المايك في الكيبورد.';
+    $('aiMsg').hidden=false;
+  }
   $('aiMic').onclick=function(){
+    if(!rec&&micMode()==='kbd') return kbdDictate();
     if(!SR) return micHelp();
     if(rec){try{rec.stop()}catch(e){}return}
     rec=new SR();rec.lang='ar-SA';rec.continuous=true;rec.interimResults=true;
